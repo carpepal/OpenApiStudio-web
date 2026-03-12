@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { PreviewComponent } from './components/preview/preview.component';
@@ -12,9 +12,32 @@ import { AsideComponent } from './components/aside.component/aside.component';
 })
 export class AppComponent {
   title = 'open-api-studio-web';
-  activePreview: boolean = false;
+  activePreview = false;
+  previewWidth = 380;
+  isResizing = false;
+  private resizeStartX = 0;
+  private resizeStartWidth = 0;
 
   togglePreview() {
     this.activePreview = !this.activePreview;
+  }
+
+  startResize(event: MouseEvent) {
+    this.isResizing = true;
+    this.resizeStartX = event.clientX;
+    this.resizeStartWidth = this.previewWidth;
+    event.preventDefault();
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onMouseMove(event: MouseEvent) {
+    if (!this.isResizing) return;
+    const delta = this.resizeStartX - event.clientX;
+    this.previewWidth = Math.max(200, Math.min(900, this.resizeStartWidth + delta));
+  }
+
+  @HostListener('document:mouseup')
+  onMouseUp() {
+    this.isResizing = false;
   }
 }
