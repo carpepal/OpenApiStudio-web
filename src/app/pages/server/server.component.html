@@ -1,0 +1,60 @@
+<app-main-layout>
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-2xl font-bold">Servers</h2>
+  </div>
+
+  @for (server of forms.serverGroups; track $index) {
+    <app-panel>
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-sm font-semibold text-gray-500">Servidor {{ $index + 1 }}</span>
+        @if (forms.serversForm.length > 1) {
+          <button
+            (click)="forms.removeServer($index)"
+            class="text-xs text-red-500 hover:text-red-700 transition-colors"
+          >
+            Eliminar
+          </button>
+        }
+      </div>
+
+      <form [formGroup]="server" class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label [for]="'url-' + $index" class="text-sm font-medium">URL</label>
+          <input
+            [id]="'url-' + $index"
+            type="url"
+            formControlName="url"
+            placeholder="https://api.example.com"
+            class="border border-gray-300 rounded px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label [for]="'entorno-' + $index" class="text-sm font-medium">Entorno</label>
+          <input
+            [id]="'entorno-' + $index"
+            type="text"
+            formControlName="entorno"
+            placeholder="production"
+            class="border border-gray-300 rounded px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div class="col-span-2 flex flex-col gap-1">
+          <label [for]="'descripcion-' + $index" class="text-sm font-medium">Descripción</label>
+          <textarea
+            [id]="'descripcion-' + $index"
+            formControlName="descripcion"
+            placeholder="Descripción del servidor..."
+            rows="3"
+            class="border border-gray-300 rounded px-3 py-2 text-sm resize-y"
+          ></textarea>
+        </div>
+      </form>
+    </app-panel>
+  }
+
+  <div class="mt-2">
+    <app-button label="+ Añadir servidor" type="button" (pressed)="forms.addServer()" />
+  </div>
+</app-main-layout>

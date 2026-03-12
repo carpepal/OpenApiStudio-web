@@ -1,0 +1,38 @@
+<div class="h-full flex flex-col bg-gray-900 text-gray-100">
+
+  <!-- Header: tabs + copy button -->
+  <div class="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700 shrink-0">
+    <div class="flex gap-1">
+      <button
+        (click)="setTab('json')"
+        [class.bg-indigo-600]="activeTab === 'json'"
+        [class.text-white]="activeTab === 'json'"
+        [class.text-gray-400]="activeTab !== 'json'"
+        class="px-3 py-1 text-xs font-mono rounded transition-colors"
+      >
+        JSON
+      </button>
+      <button
+        (click)="setTab('yaml')"
+        [class.bg-indigo-600]="activeTab === 'yaml'"
+        [class.text-white]="activeTab === 'yaml'"
+        [class.text-gray-400]="activeTab !== 'yaml'"
+        class="px-3 py-1 text-xs font-mono rounded transition-colors"
+      >
+        YAML
+      </button>
+    </div>
+    <button
+      (click)="copy()"
+      class="text-xs text-gray-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-gray-700"
+    >
+      Copiar
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 overflow-auto">
+    <pre class="p-4 text-xs font-mono leading-relaxed text-green-300 whitespace-pre">{{ content }}</pre>
+  </div>
+
+</div>
