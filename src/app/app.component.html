@@ -1,0 +1,19 @@
+<app-navbar (togglePreview)="togglePreview()"></app-navbar>
+<div class="flex flex-row h-screen" [class.select-none]="isResizing" [class.cursor-col-resize]="isResizing">
+  <app-aside class="w-48 shrink-0 bg-gray-200"></app-aside>
+  <main class="flex-1 overflow-auto min-w-0">
+    <router-outlet />
+  </main>
+  @if (activePreview) {
+    <div
+      class="w-1.5 shrink-0 cursor-col-resize bg-gray-200 hover:bg-indigo-400 transition-colors"
+      [class.bg-indigo-400]="isResizing"
+      (mousedown)="startResize($event)"
+    ></div>
+    <app-preview
+      class="shrink-0 bg-gray-300"
+      [style.width.px]="previewWidth"
+      [active]="activePreview"
+    ></app-preview>
+  }
+</div>

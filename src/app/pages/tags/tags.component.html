@@ -1,0 +1,58 @@
+<app-main-layout>
+  <h2 class="text-2xl font-bold mb-4">Tags</h2>
+
+  @for (tag of forms.tagGroups; track $index) {
+    <app-panel>
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-sm font-semibold text-gray-500">Tag {{ $index + 1 }}</span>
+        @if (forms.tagsForm.length > 1) {
+          <button
+            (click)="forms.removeTag($index)"
+            class="text-xs text-red-500 hover:text-red-700 transition-colors"
+          >
+            Eliminar
+          </button>
+        }
+      </div>
+
+      <form [formGroup]="tag" class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label [for]="'name-' + $index" class="text-sm font-medium">Nombre</label>
+          <input
+            [id]="'name-' + $index"
+            type="text"
+            formControlName="name"
+            placeholder="petStore"
+            class="border border-gray-300 rounded px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label [for]="'externalDocsUrl-' + $index" class="text-sm font-medium">External Docs URL</label>
+          <input
+            [id]="'externalDocsUrl-' + $index"
+            type="url"
+            formControlName="externalDocsUrl"
+            placeholder="https://docs.example.com"
+            class="border border-gray-300 rounded px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div class="col-span-2 flex flex-col gap-1">
+          <label [for]="'description-' + $index" class="text-sm font-medium">Descripción</label>
+          <textarea
+            [id]="'description-' + $index"
+            formControlName="description"
+            placeholder="Descripción del tag..."
+            rows="3"
+            class="border border-gray-300 rounded px-3 py-2 text-sm resize-y"
+          ></textarea>
+        </div>
+      </form>
+    </app-panel>
+  }
+
+  <div class="mt-2">
+    <app-button label="+ Añadir tag" type="button" (pressed)="forms.addTag()" />
+  </div>
+</app-main-layout>
