@@ -91,6 +91,8 @@ export class OpenApiFormsService {
   }
 
   // ── Paths ─────────────────────────────────────────────────────────────────
+  private static readonly METHODS_WITHOUT_BODY: ReadonlySet<string> = new Set(['get', 'head']);
+
   private createPath(): FormGroup {
     return this.fb.group({
       path: [''], method: ['get'], operationId: [''], summary: [''],
@@ -104,6 +106,25 @@ export class OpenApiFormsService {
   get pathGroups(): FormGroup[] { return this.pathsForm.controls as FormGroup[]; }
   addPath() { this.pathsForm.push(this.createPath()); }
   removePath(i: number) { this.pathsForm.removeAt(i); }
+
+  isMethodWithoutBody(method: string): boolean {
+    return OpenApiFormsService.METHODS_WITHOUT_BODY.has(method);
+  }
+
+  clearRequestBody(pathIndex: number): void {
+    const fa = this.getRequestBody(pathIndex);
+    while (fa.length) fa.removeAt(0);
+  }
+
+  isPathMethodDuplicate(pathIndex: number): boolean {
+    const groups = this.pathGroups;
+    const path = groups[pathIndex]?.get('path')?.value;
+    const method = groups[pathIndex]?.get('method')?.value;
+    if (!path || !method) return false;
+    return groups.some((g, i) => i !== pathIndex
+      && g.get('path')?.value === path
+      && g.get('method')?.value === method);
+  }
 
   createRequestBodyContent(): FormGroup {
     return this.fb.group({ mimeType: ['application/json'], schema: [''] });

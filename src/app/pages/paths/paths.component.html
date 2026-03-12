@@ -24,7 +24,9 @@
             type="text"
             formControlName="path"
             placeholder="/users/{id}"
-            class="border border-gray-300 rounded px-3 py-2 text-sm"
+            class="border rounded px-3 py-2 text-sm"
+            [class.border-red-400]="forms.isPathMethodDuplicate(pathI)"
+            [class.border-gray-300]="!forms.isPathMethodDuplicate(pathI)"
             (input)="syncPathParams(pathI, $any($event.target).value)"
           />
         </div>
@@ -34,12 +36,18 @@
           <select
             [id]="'method-' + pathI"
             formControlName="method"
-            class="border border-gray-300 rounded px-3 py-2 text-sm"
+            class="border rounded px-3 py-2 text-sm"
+            [class.border-red-400]="forms.isPathMethodDuplicate(pathI)"
+            [class.border-gray-300]="!forms.isPathMethodDuplicate(pathI)"
+            (change)="onMethodChange(pathI, $any($event.target).value)"
           >
             @for (m of methods; track m) {
               <option [value]="m">{{ m.toUpperCase() }}</option>
             }
           </select>
+          @if (forms.isPathMethodDuplicate(pathI)) {
+            <span class="text-xs text-red-500">Path y método duplicados</span>
+          }
         </div>
 
         <div class="flex flex-col gap-1">
@@ -215,6 +223,7 @@
         </div>
 
         <!-- ── REQUEST BODY ── -->
+        @if (!forms.isMethodWithoutBody(endpoint.get('method')?.value)) {
         <div class="col-span-2 flex flex-col gap-2" formArrayName="requestBody">
           <div class="flex items-center justify-between">
             <span class="text-sm font-medium text-gray-700">Request Body</span>
@@ -276,6 +285,7 @@
             <p class="text-xs text-gray-400 italic">Sin contenido definido.</p>
           }
         </div>
+        }
 
         <!-- ── RESPONSES ── -->
         <div class="col-span-2 flex flex-col gap-2" formArrayName="responses">

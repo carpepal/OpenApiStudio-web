@@ -165,6 +165,8 @@ export class OpenApiBuilderService {
     return [...pathParams, ...queryParams];
   }
 
+  private static readonly METHODS_WITHOUT_BODY: ReadonlySet<string> = new Set(['get', 'head']);
+
   private buildOperation(endpoint: PathFormValue, parameters: OpenApiParameter[]): OpenApiOperation {
     const operation: OpenApiOperation = {};
     if (endpoint.operationId) operation.operationId = endpoint.operationId;
@@ -175,8 +177,10 @@ export class OpenApiBuilderService {
       operation.security = endpoint.security.map(s => ({ [s]: [] }));
     }
     if (parameters.length) operation.parameters = parameters;
-    const requestBody = this.buildRequestBody(endpoint);
-    if (requestBody) operation.requestBody = requestBody;
+    if (!OpenApiBuilderService.METHODS_WITHOUT_BODY.has(endpoint.method)) {
+      const requestBody = this.buildRequestBody(endpoint);
+      if (requestBody) operation.requestBody = requestBody;
+    }
     const responses = this.buildResponses(endpoint);
     if (Object.keys(responses).length) operation.responses = responses;
     return operation;

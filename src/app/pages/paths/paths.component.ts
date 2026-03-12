@@ -22,4 +22,10 @@ export class PathsComponent {
     const names = [...pathValue.matchAll(/\{([^}]+)\}/g)].map(m => m[1]);
     this.forms.syncPathParams(pathIndex, names);
   }
+
+  onMethodChange(pathIndex: number, method: string) {
+    if (this.forms.isMethodWithoutBody(method)) {
+      this.forms.clearRequestBody(pathIndex);
+    }
+  }
 }
