@@ -1,0 +1,160 @@
+<app-main-layout>
+  <h2 class="text-2xl font-bold mb-4">Security Schemes</h2>
+
+  @for (scheme of forms.schemeGroups; track $index) {
+    <app-panel>
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-sm font-semibold text-gray-500">Esquema {{ $index + 1 }}</span>
+        @if (forms.schemesForm.length > 1) {
+          <button
+            (click)="forms.removeScheme($index)"
+            class="text-xs text-red-500 hover:text-red-700 transition-colors"
+          >
+            Eliminar
+          </button>
+        }
+      </div>
+
+      <form [formGroup]="scheme" class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label [for]="'schemeName-' + $index" class="text-sm font-medium">Nombre del esquema</label>
+          <input
+            [id]="'schemeName-' + $index"
+            type="text"
+            formControlName="schemeName"
+            placeholder="bearerAuth"
+            class="border border-gray-300 rounded px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label [for]="'type-' + $index" class="text-sm font-medium">Tipo</label>
+          <select
+            [id]="'type-' + $index"
+            formControlName="type"
+            class="border border-gray-300 rounded px-3 py-2 text-sm"
+          >
+            @for (t of securityTypes; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </div>
+
+        @if (getType($index) === 'apiKey') {
+          <div class="flex flex-col gap-1">
+            <label [for]="'paramName-' + $index" class="text-sm font-medium">Nombre del parámetro</label>
+            <input
+              [id]="'paramName-' + $index"
+              type="text"
+              formControlName="paramName"
+              placeholder="X-API-Key"
+              class="border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label [for]="'in-' + $index" class="text-sm font-medium">Ubicación</label>
+            <select
+              [id]="'in-' + $index"
+              formControlName="in"
+              class="border border-gray-300 rounded px-3 py-2 text-sm"
+            >
+              @for (loc of apiKeyLocations; track loc) {
+                <option [value]="loc">{{ loc }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        @if (getType($index) === 'http') {
+          <div class="flex flex-col gap-1">
+            <label [for]="'scheme-' + $index" class="text-sm font-medium">Esquema HTTP</label>
+            <select
+              [id]="'scheme-' + $index"
+              formControlName="scheme"
+              class="border border-gray-300 rounded px-3 py-2 text-sm"
+            >
+              @for (s of httpSchemes; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label [for]="'bearerFormat-' + $index" class="text-sm font-medium">Bearer Format</label>
+            <input
+              [id]="'bearerFormat-' + $index"
+              type="text"
+              formControlName="bearerFormat"
+              placeholder="JWT"
+              class="border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+          </div>
+        }
+
+        @if (getType($index) === 'oauth2') {
+          <div class="flex flex-col gap-1">
+            <label [for]="'authorizationUrl-' + $index" class="text-sm font-medium">Authorization URL</label>
+            <input
+              [id]="'authorizationUrl-' + $index"
+              type="url"
+              formControlName="authorizationUrl"
+              placeholder="https://auth.example.com/oauth2/authorize"
+              class="border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label [for]="'tokenUrl-' + $index" class="text-sm font-medium">Token URL</label>
+            <input
+              [id]="'tokenUrl-' + $index"
+              type="url"
+              formControlName="tokenUrl"
+              placeholder="https://auth.example.com/oauth2/token"
+              class="border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div class="col-span-2 flex flex-col gap-1">
+            <label [for]="'scopes-' + $index" class="text-sm font-medium">Scopes</label>
+            <input
+              [id]="'scopes-' + $index"
+              type="text"
+              formControlName="scopes"
+              placeholder="read:users write:users"
+              class="border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+          </div>
+        }
+
+        @if (getType($index) === 'openIdConnect') {
+          <div class="col-span-2 flex flex-col gap-1">
+            <label [for]="'openIdConnectUrl-' + $index" class="text-sm font-medium">OpenID Connect URL</label>
+            <input
+              [id]="'openIdConnectUrl-' + $index"
+              type="url"
+              formControlName="openIdConnectUrl"
+              placeholder="https://auth.example.com/.well-known/openid-configuration"
+              class="border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+          </div>
+        }
+
+        <div class="col-span-2 flex flex-col gap-1">
+          <label [for]="'description-' + $index" class="text-sm font-medium">Descripción</label>
+          <textarea
+            [id]="'description-' + $index"
+            formControlName="description"
+            placeholder="Descripción del esquema de seguridad..."
+            rows="2"
+            class="border border-gray-300 rounded px-3 py-2 text-sm resize-y"
+          ></textarea>
+        </div>
+      </form>
+    </app-panel>
+  }
+
+  <div class="mt-2">
+    <app-button label="+ Añadir esquema" type="button" (pressed)="forms.addScheme()" />
+  </div>
+</app-main-layout>
