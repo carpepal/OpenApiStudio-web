@@ -17,7 +17,7 @@
   </div>
 
   @for (tag of forms.tagGroups; track $index) {
-    <app-panel>
+    <app-panel [attr.id]="'item-tag-' + $index">
       <div class="flex justify-between items-center mb-4">
         <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">Tag {{ $index + 1 }}</span>
         @if (forms.tagsForm.length > 1) {

@@ -17,7 +17,7 @@
   </div>
 
   @for (scheme of forms.schemeGroups; track $index) {
-    <app-panel>
+    <app-panel [attr.id]="'item-security-' + $index">
       <div class="flex justify-between items-center mb-4">
         <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">Scheme {{ $index + 1 }}</span>
         @if (forms.schemesForm.length > 1) {

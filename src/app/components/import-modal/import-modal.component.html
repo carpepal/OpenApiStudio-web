@@ -1,0 +1,106 @@
+@if (isOpen()) {
+  <!-- Overlay -->
+  <div
+    class="fixed inset-0 bg-black/40 z-50"
+    (click)="close()"
+  ></div>
+
+  <!-- Modal panel -->
+  <div class="fixed top-1/4 left-1/2 -translate-x-1/2 w-[480px] bg-white rounded-xl shadow-2xl z-50 overflow-hidden">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        <h2 class="text-sm font-semibold text-gray-800">Importar fichero OpenAPI</h2>
+      </div>
+      <button
+        type="button"
+        (click)="close()"
+        class="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        aria-label="Cerrar"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-5">
+
+      <!-- Drop zone -->
+      <div
+        class="relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center gap-3 cursor-pointer transition-colors"
+        [ngClass]="isDragOver() ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300 hover:border-indigo-400 hover:bg-gray-50'"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)"
+        (click)="triggerFileInput()"
+      >
+        <!-- Hidden file input -->
+        <input
+          #fileInput
+          type="file"
+          class="hidden"
+          accept=".json,.yaml,.yml"
+          (change)="onFileSelected($event)"
+        />
+
+        @if (isSuccess()) {
+          <!-- Success state -->
+          <div class="flex flex-col items-center gap-2 text-green-600">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-sm font-medium">¡Importado correctamente!</p>
+            <p class="text-xs text-green-500">{{ fileName() }}</p>
+          </div>
+        } @else {
+          <!-- Upload icon -->
+          <svg
+            class="w-10 h-10 transition-colors"
+            [ngClass]="isDragOver() ? 'text-indigo-500' : 'text-gray-400'"
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+
+          @if (fileName() && !error()) {
+            <p class="text-sm font-medium text-gray-700">{{ fileName() }}</p>
+            <p class="text-xs text-gray-400">Procesando...</p>
+          } @else {
+            <div class="text-center">
+              <p class="text-sm font-medium text-gray-700">Arrastra tu fichero aquí</p>
+              <p class="text-xs text-gray-400 mt-1">o haz click para seleccionar</p>
+            </div>
+            <p class="text-xs text-gray-400">JSON, YAML o YML</p>
+          }
+        }
+      </div>
+
+      <!-- Error message -->
+      @if (error()) {
+        <div class="mt-4 flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-3">
+          <svg class="w-4 h-4 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-sm text-red-700">{{ error() }}</p>
+        </div>
+      }
+
+      <!-- Hint -->
+      @if (!error() && !isSuccess()) {
+        <p class="mt-4 text-xs text-gray-400 text-center">
+          Compatible con OpenAPI 3.0 en formato JSON o YAML
+        </p>
+      }
+
+    </div>
+  </div>
+}

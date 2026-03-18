@@ -17,7 +17,7 @@
   </div>
 
   @for (schema of forms.schemaGroups; track schI; let schI = $index) {
-    <div class="mb-4 rounded-xl bg-surface-muted border border-border-light overflow-hidden transition-colors">
+    <div [attr.id]="'item-schema-' + schI" class="mb-4 rounded-xl bg-surface-muted border border-border-light overflow-hidden transition-colors">
       <!-- Panel Header -->
       <div class="flex items-center gap-3 px-5 py-3.5 bg-surface-alt">
         <span class="px-2.5 py-1 text-[11px] font-semibold rounded uppercase tracking-wide {{ getBadgeClass(getKind(schI)) }}">

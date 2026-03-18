@@ -17,7 +17,8 @@
   </div>
 
   @for (endpoint of forms.pathGroups; track pathI; let pathI = $index) {
-    <div class="mb-4 rounded-xl bg-surface-muted overflow-hidden transition-colors"
+    <div [attr.id]="'item-path-' + pathI"
+         class="mb-4 rounded-xl bg-surface-muted overflow-hidden transition-colors"
          [class.border]="forms.isPathMethodDuplicate(pathI)"
          [class.border-danger]="forms.isPathMethodDuplicate(pathI)">
       <!-- Panel Header -->

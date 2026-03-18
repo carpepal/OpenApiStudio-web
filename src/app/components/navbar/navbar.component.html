@@ -1,6 +1,14 @@
+<app-import-modal #importModal></app-import-modal>
+
 <nav class="bg-surface-alt h-14 px-6 text-text-primary flex flex-row justify-between items-center border-b border-border-light transition-colors">
   <span class="font-mono font-bold text-base tracking-wider">openapistudio</span>
   <div class="flex flex-row gap-3 items-center">
+    <button
+      (click)="openImport()"
+      class="flex items-center gap-1.5 border border-border text-text-secondary text-sm font-medium rounded-md px-4 py-2 hover:border-accent hover:text-accent transition-colors">
+      <lucide-icon name="upload" [size]="16"></lucide-icon>
+      Import
+    </button>
     <button
       (click)="onTogglePreview()"
       class="flex items-center gap-1.5 bg-accent text-text-on-dark text-sm font-semibold rounded-md px-4 py-2 hover:bg-accent-hover transition-colors">

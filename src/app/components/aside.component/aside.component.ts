@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, ViewChild } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { LucideAngularModule, Info, Server, Route, Tag, Shield, Braces, Puzzle, LifeBuoy, AlertTriangle, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
+import { LucideAngularModule, Info, Server, Route, Tag, Shield, Braces, Puzzle, LifeBuoy, AlertTriangle, Search, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
 import { OpenApiFormsService } from '../../services/open-api-forms.service';
+import { SearchModalComponent } from '../search-modal/search-modal.component';
 
 interface SidebarNavItem {
   readonly routePath: string;
@@ -18,13 +19,19 @@ interface SidebarNavSection {
 
 @Component({
   selector: 'app-aside',
-  imports: [RouterLink, RouterLinkActive, LucideAngularModule],
-  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Info, Server, Route, Tag, Shield, Braces, Puzzle, LifeBuoy, AlertTriangle }) }],
+  imports: [RouterLink, RouterLinkActive, LucideAngularModule, SearchModalComponent],
+  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Info, Server, Route, Tag, Shield, Braces, Puzzle, LifeBuoy, AlertTriangle, Search }) }],
   templateUrl: './aside.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AsideComponent {
   private readonly formsService = inject(OpenApiFormsService);
+
+  @ViewChild('searchModal') searchModal!: SearchModalComponent;
+
+  openSearch(): void {
+    this.searchModal.open();
+  }
 
   private readonly apiInfoValue = toSignal(
     this.formsService.apiInfoForm.valueChanges,
