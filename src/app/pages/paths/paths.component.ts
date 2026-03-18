@@ -1,20 +1,30 @@
 import { Component } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MainComponent } from '../../layout/main/main.component';
-import { PanelComponent } from '../../components/panel/panel.component';
-import { ButtonComponent } from '../../components/button/button.component';
 import { OpenApiFormsService } from '../../services/open-api-forms.service';
 import { OpenApiStateService } from '../../services/open-api-state.service';
+import { LucideAngularModule, Route, Plus, Trash2, CircleCheck, TriangleAlert, CircleAlert, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
 
 @Component({
   selector: 'app-paths',
-  imports: [MainComponent, PanelComponent, ReactiveFormsModule, ButtonComponent],
+  imports: [MainComponent, ReactiveFormsModule, LucideAngularModule],
+  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Route, Plus, Trash2, CircleCheck, TriangleAlert, CircleAlert }) }],
   templateUrl: './paths.component.html',
   styleUrl: './paths.component.scss',
 })
 export class PathsComponent {
   readonly methods = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'];
   readonly paramTypes = ['string', 'integer', 'number', 'boolean'];
+
+  readonly methodBadgeClasses: Record<string, string> = {
+    get: 'bg-badge-green-bg text-badge-green-text',
+    post: 'bg-badge-blue-bg text-badge-blue-text',
+    put: 'bg-badge-amber-bg text-badge-amber-text',
+    patch: 'bg-badge-purple-bg text-badge-purple-text',
+    delete: 'bg-badge-red-bg text-badge-red-text',
+    head: 'bg-badge-slate-bg text-badge-slate-text',
+    options: 'bg-badge-slate-bg text-badge-slate-text',
+  };
 
   constructor(public forms: OpenApiFormsService, public state: OpenApiStateService) {}
 
@@ -23,9 +33,20 @@ export class PathsComponent {
     this.forms.syncPathParams(pathIndex, names);
   }
 
-  onMethodChange(pathIndex: number, method: string) {
+  onPathInput(pathIndex: number, event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.syncPathParams(pathIndex, inputElement.value);
+  }
+
+  onMethodChange(pathIndex: number, event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const method = selectElement.value;
     if (this.forms.isMethodWithoutBody(method)) {
       this.forms.clearRequestBody(pathIndex);
     }
+  }
+
+  getMethodBadgeClass(method: string): string {
+    return this.methodBadgeClasses[method] ?? 'bg-badge-slate-bg text-badge-slate-text';
   }
 }

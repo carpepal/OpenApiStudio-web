@@ -1,60 +1,68 @@
 <app-main-layout>
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-2xl font-bold">Servers</h2>
+  <!-- Content Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <lucide-icon name="server" [size]="24" class="text-accent"></lucide-icon>
+      <div>
+        <h2 class="text-xl font-semibold text-text-primary">Servers</h2>
+        <p class="text-sm text-text-secondary">Define your API server endpoints</p>
+      </div>
+    </div>
+    <button
+      (click)="forms.addServer()"
+      class="flex items-center gap-2 bg-accent text-text-on-dark text-sm font-semibold rounded-md px-5 py-2.5 hover:bg-accent-hover transition-colors">
+      <lucide-icon name="plus" [size]="16"></lucide-icon>
+      Add Server
+    </button>
   </div>
 
   @for (server of forms.serverGroups; track $index) {
     <app-panel>
-      <div class="flex justify-between items-center mb-3">
-        <span class="text-sm font-semibold text-gray-500">Servidor {{ $index + 1 }}</span>
+      <div class="flex justify-between items-center mb-4">
+        <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">Server {{ $index + 1 }}</span>
         @if (forms.serversForm.length > 1) {
           <button
             (click)="forms.removeServer($index)"
-            class="text-xs text-red-500 hover:text-red-700 transition-colors"
-          >
-            Eliminar
+            class="text-text-muted hover:text-danger transition-colors">
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
           </button>
         }
       </div>
 
-      <form [formGroup]="server" class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1">
-          <label [for]="'url-' + $index" class="text-sm font-medium">URL</label>
+      <form [formGroup]="server" class="grid grid-cols-2 gap-5">
+        <div class="flex flex-col gap-1.5">
+          <label [for]="'url-' + $index" class="text-xs font-semibold text-text-secondary">URL</label>
           <input
             [id]="'url-' + $index"
             type="url"
             formControlName="url"
             placeholder="https://api.example.com"
-            class="border border-gray-300 rounded px-3 py-2 text-sm"
+            class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
           />
         </div>
 
-        <div class="flex flex-col gap-1">
-          <label [for]="'entorno-' + $index" class="text-sm font-medium">Entorno</label>
+        <div class="flex flex-col gap-1.5">
+          <label [for]="'entorno-' + $index" class="text-xs font-semibold text-text-secondary">Environment</label>
           <input
             [id]="'entorno-' + $index"
             type="text"
             formControlName="entorno"
             placeholder="production"
-            class="border border-gray-300 rounded px-3 py-2 text-sm"
+            class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
           />
         </div>
 
-        <div class="col-span-2 flex flex-col gap-1">
-          <label [for]="'descripcion-' + $index" class="text-sm font-medium">Descripción</label>
+        <div class="col-span-2 flex flex-col gap-1.5">
+          <label [for]="'descripcion-' + $index" class="text-xs font-semibold text-text-secondary">Description</label>
           <textarea
             [id]="'descripcion-' + $index"
             formControlName="descripcion"
-            placeholder="Descripción del servidor..."
+            placeholder="Server description..."
             rows="3"
-            class="border border-gray-300 rounded px-3 py-2 text-sm resize-y"
+            class="border border-border rounded-md px-3 py-2.5 text-sm resize-y bg-surface-alt text-text-primary transition-colors"
           ></textarea>
         </div>
       </form>
     </app-panel>
   }
-
-  <div class="mt-2">
-    <app-button label="+ Añadir servidor" type="button" (pressed)="forms.addServer()" />
-  </div>
 </app-main-layout>

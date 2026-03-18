@@ -1,61 +1,67 @@
 <app-main-layout>
-  <h2 class="text-2xl font-bold mb-4">API Information</h2>
+  <!-- Content Header -->
+  <div class="flex items-center gap-3 mb-6">
+    <lucide-icon name="info" [size]="24" class="text-accent"></lucide-icon>
+    <div>
+      <h2 class="text-xl font-semibold text-text-primary">API Info</h2>
+      <p class="text-sm text-text-secondary">General information about your API</p>
+    </div>
+  </div>
+
   <app-panel>
-    <form [formGroup]="forms.apiInfoForm" class="grid grid-cols-2 gap-4">
-      <div class="flex flex-col gap-1">
-        <label for="title" class="text-sm font-medium">Title</label>
+    <form [formGroup]="forms.apiInfoForm" class="grid grid-cols-2 gap-5">
+      <div class="flex flex-col gap-1.5">
+        <label for="title" class="text-xs font-semibold text-text-secondary">Title</label>
         <input
           id="title"
           type="text"
           formControlName="title"
           placeholder="My API"
-          class="border border-gray-300 rounded px-3 py-2 text-sm"
+          class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
         />
       </div>
 
-      <div class="flex flex-col gap-1">
-        <label for="version" class="text-sm font-medium">Version</label>
+      <div class="flex flex-col gap-1.5">
+        <label for="version" class="text-xs font-semibold text-text-secondary">Version</label>
         <input
           id="version"
           type="text"
           formControlName="version"
           placeholder="1.0.0"
-          class="border border-gray-300 rounded px-3 py-2 text-sm"
+          class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
         />
       </div>
 
-      <div class="col-span-2 flex flex-col gap-1">
-        <label for="description" class="text-sm font-medium">Description</label>
+      <div class="col-span-2 flex flex-col gap-1.5">
+        <label for="description" class="text-xs font-semibold text-text-secondary">Description</label>
         <textarea
           id="description"
           formControlName="description"
           placeholder="API description..."
-          rows="4"
-          class="border border-gray-300 rounded px-3 py-2 text-sm resize-y"
+          rows="3"
+          class="border border-border rounded-md px-3 py-2.5 text-sm resize-y bg-surface-alt text-text-primary transition-colors"
         ></textarea>
       </div>
 
-      <div class="flex flex-col gap-1">
-        <label for="contactEmail" class="text-sm font-medium"
-          >Contact email</label
-        >
+      <div class="flex flex-col gap-1.5">
+        <label for="contactEmail" class="text-xs font-semibold text-text-secondary">Contact email</label>
         <input
           id="contactEmail"
           type="email"
           formControlName="contactEmail"
           placeholder="contact@example.com"
-          class="border border-gray-300 rounded px-3 py-2 text-sm"
+          class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
         />
       </div>
 
-      <div class="flex flex-col gap-1">
-        <label for="license" class="text-sm font-medium">License</label>
+      <div class="flex flex-col gap-1.5">
+        <label for="license" class="text-xs font-semibold text-text-secondary">License</label>
         <input
           id="license"
           type="text"
           formControlName="license"
           placeholder="MIT"
-          class="border border-gray-300 rounded px-3 py-2 text-sm"
+          class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
         />
       </div>
     </form>

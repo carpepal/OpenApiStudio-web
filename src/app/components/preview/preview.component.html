@@ -1,38 +1,56 @@
-<div class="h-full flex flex-col bg-gray-900 text-gray-100">
+<div class="h-full flex flex-col bg-surface-alt text-text-primary transition-colors">
 
-  <!-- Header: tabs + copy button -->
-  <div class="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700 shrink-0">
-    <div class="flex gap-1">
+  <!-- Header -->
+  <div class="flex items-center gap-3 px-4 py-3 bg-surface-alt border-b border-border-light shrink-0">
+    <span class="text-sm font-semibold">Preview</span>
+    <div class="flex-1"></div>
+
+    <!-- Format toggle pill -->
+    <div class="flex bg-surface-muted rounded-md p-0.5">
       <button
         (click)="setTab('json')"
-        [class.bg-indigo-600]="activeTab === 'json'"
-        [class.text-white]="activeTab === 'json'"
-        [class.text-gray-400]="activeTab !== 'json'"
-        class="px-3 py-1 text-xs font-mono rounded transition-colors"
-      >
+        [class.bg-accent]="activeTab() === 'json'"
+        [class.text-text-on-dark]="activeTab() === 'json'"
+        [class.text-text-muted]="activeTab() !== 'json'"
+        class="px-3 py-1 text-xs font-mono rounded transition-colors">
         JSON
       </button>
       <button
         (click)="setTab('yaml')"
-        [class.bg-indigo-600]="activeTab === 'yaml'"
-        [class.text-white]="activeTab === 'yaml'"
-        [class.text-gray-400]="activeTab !== 'yaml'"
-        class="px-3 py-1 text-xs font-mono rounded transition-colors"
-      >
+        [class.bg-accent]="activeTab() === 'yaml'"
+        [class.text-text-on-dark]="activeTab() === 'yaml'"
+        [class.text-text-muted]="activeTab() !== 'yaml'"
+        class="px-3 py-1 text-xs font-mono rounded transition-colors">
         YAML
       </button>
     </div>
+
+    <!-- Copy button -->
     <button
       (click)="copy()"
-      class="text-xs text-gray-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-gray-700"
-    >
-      Copiar
+      class="flex items-center gap-1.5 text-xs text-text-secondary hover:text-text-primary transition-colors px-2.5 py-1.5 rounded-md bg-surface-muted border border-border-light hover:bg-surface">
+      <lucide-icon [name]="copied() ? 'check' : 'copy'" [size]="14"></lucide-icon>
+      {{ copied() ? 'Copied' : 'Copy' }}
+    </button>
+
+    <!-- Download button -->
+    <button
+      (click)="download()"
+      class="flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors p-1.5 rounded-md bg-surface-muted border border-border-light hover:bg-surface">
+      <lucide-icon name="download" [size]="14"></lucide-icon>
     </button>
   </div>
 
-  <!-- Content -->
-  <div class="flex-1 overflow-auto">
-    <pre class="p-4 text-xs font-mono leading-relaxed text-green-300 whitespace-pre">{{ content }}</pre>
+  <!-- Content with line numbers -->
+  <div class="flex-1 overflow-auto flex">
+    <!-- Line numbers gutter -->
+    <div class="w-11 shrink-0 bg-surface-alt text-text-muted text-right pr-3 pt-4 pb-4 text-xs font-mono leading-[1.7] select-none border-r border-border-light">
+      @for (lineNum of lineNumbers; track lineNum) {
+        <div>{{ lineNum }}</div>
+      }
+    </div>
+    <!-- Code -->
+    <pre class="flex-1 p-4 text-xs font-mono leading-[1.7] text-code whitespace-pre overflow-x-auto">{{ content }}</pre>
   </div>
 
 </div>
