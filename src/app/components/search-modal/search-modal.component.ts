@@ -11,10 +11,10 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, filter, take } from 'rxjs/operators';
 import { SearchResultViewModel } from '../../models/search.models';
 import { SearchService } from '../../services/search.service';
 
@@ -81,8 +81,22 @@ export class SearchModalComponent implements OnInit {
   }
 
   navigateTo(result: SearchResultViewModel): void {
-    this.router.navigate([result.route], { fragment: result.fragment });
     this.close();
+    this.router.navigate([result.route], { fragment: result.fragment });
+
+    // withInMemoryScrolling only scrolls window, but <main> has overflow-auto.
+    // Wait for NavigationEnd (handles cross-route changes) then manually scroll
+    // the target element into view within the actual scroll container.
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      take(1),
+    ).subscribe(() => {
+      // setTimeout defers until after Angular renders the new route's components
+      setTimeout(() => {
+        document.getElementById(result.fragment)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
   }
 
   @HostListener('document:keydown.escape')
