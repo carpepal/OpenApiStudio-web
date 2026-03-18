@@ -1,309 +1,484 @@
 <app-main-layout>
-  <h2 class="text-2xl font-bold mb-4">Schemas</h2>
+  <!-- Content Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <lucide-icon name="braces" [size]="24" class="text-accent"></lucide-icon>
+      <div>
+        <h2 class="text-xl font-semibold text-text-primary">Schemas</h2>
+        <p class="text-sm text-text-secondary">Define reusable data models for your API</p>
+      </div>
+    </div>
+    <button
+      (click)="addSchema()"
+      class="flex items-center gap-2 bg-accent text-text-on-dark text-sm font-semibold rounded-md px-5 py-2.5 hover:bg-accent-hover transition-colors">
+      <lucide-icon name="plus" [size]="16"></lucide-icon>
+      Add Schema
+    </button>
+  </div>
 
   @for (schema of forms.schemaGroups; track schI; let schI = $index) {
-    <app-panel>
-      <div class="flex justify-between items-center mb-3">
-        <span class="text-sm font-semibold text-gray-500">Schema {{ schI + 1 }}</span>
+    <div class="mb-4 rounded-xl bg-surface-muted border border-border-light overflow-hidden transition-colors">
+      <!-- Panel Header -->
+      <div class="flex items-center gap-3 px-5 py-3.5 bg-surface-alt">
+        <span class="px-2.5 py-1 text-[11px] font-semibold rounded uppercase tracking-wide {{ getBadgeClass(getKind(schI)) }}">
+          {{ kindLabels[getKind(schI)] }}
+        </span>
+        <span class="font-mono text-sm font-semibold text-text-primary">
+          {{ schema.get('name')?.value || 'Unnamed' }}
+        </span>
+        <div class="flex-1"></div>
         @if (forms.schemasForm.length > 1) {
           <button
             (click)="forms.removeSchema(schI)"
-            class="text-xs text-red-500 hover:text-red-700 transition-colors"
-          >
-            Eliminar
+            class="text-text-muted hover:text-danger transition-colors">
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
           </button>
         }
       </div>
 
-      <form [formGroup]="schema" class="grid grid-cols-2 gap-4">
+      <!-- Panel Body -->
+      <div class="p-5">
+        <form [formGroup]="schema" class="grid grid-cols-2 gap-5">
+          <!-- Name | Kind -->
+          <div class="flex flex-col gap-1.5">
+            <label [for]="'name-' + schI" class="text-xs font-semibold text-text-secondary">Schema Name</label>
+            <input
+              [id]="'name-' + schI"
+              type="text"
+              formControlName="name"
+              placeholder="User"
+              class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+            />
+          </div>
 
-        <!-- Nombre | Tipo de definición -->
-        <div class="flex flex-col gap-1">
-          <label [for]="'name-' + schI" class="text-sm font-medium">Nombre</label>
-          <input
-            [id]="'name-' + schI"
-            type="text"
-            formControlName="name"
-            placeholder="User"
-            class="border border-gray-300 rounded px-3 py-2 text-sm"
-          />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label [for]="'kind-' + schI" class="text-sm font-medium">Tipo de definición</label>
-          <select
-            [id]="'kind-' + schI"
-            formControlName="kind"
-            class="border border-gray-300 rounded px-3 py-2 text-sm"
-          >
-            @for (k of kinds; track k) {
-              <option [value]="k">{{ kindLabels[k] }}</option>
-            }
-          </select>
-        </div>
-
-        <!-- ── PRIMITIVO ── -->
-        @if (getKind(schI) === 'primitive') {
-          <div class="flex flex-col gap-1">
-            <label [for]="'type-' + schI" class="text-sm font-medium">Tipo</label>
+          <div class="flex flex-col gap-1.5">
+            <label [for]="'kind-' + schI" class="text-xs font-semibold text-text-secondary">Definition type</label>
             <select
-              [id]="'type-' + schI"
-              formControlName="type"
-              class="border border-gray-300 rounded px-3 py-2 text-sm"
+              [id]="'kind-' + schI"
+              formControlName="kind"
+              class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
             >
-              @for (t of primitiveTypes; track t) {
-                <option [value]="t">{{ t }}</option>
+              @for (k of kinds; track k) {
+                <option [value]="k">{{ kindLabels[k] }}</option>
               }
             </select>
           </div>
 
-          @if (getFormatsForType(getPrimitiveType(schI)).length > 0) {
-            <div class="flex flex-col gap-1">
-              <label [for]="'format-' + schI" class="text-sm font-medium">Formato</label>
+          <!-- PRIMITIVE -->
+          @if (getKind(schI) === 'primitive') {
+            <div class="flex flex-col gap-1.5">
+              <label [for]="'type-' + schI" class="text-xs font-semibold text-text-secondary">Type</label>
               <select
-                [id]="'format-' + schI"
-                formControlName="format"
-                class="border border-gray-300 rounded px-3 py-2 text-sm"
-              >
-                @for (f of getFormatsForType(getPrimitiveType(schI)); track f) {
-                  <option [value]="f">{{ f || '— ninguno —' }}</option>
-                }
-              </select>
-            </div>
-          }
-
-          <div class="col-span-2 flex flex-col gap-1">
-            <label [for]="'example-' + schI" class="text-sm font-medium">Ejemplo</label>
-            <input
-              [id]="'example-' + schI"
-              type="text"
-              formControlName="example"
-              placeholder="john@example.com"
-              class="border border-gray-300 rounded px-3 py-2 text-sm"
-            />
-          </div>
-        }
-
-        <!-- ── OBJETO: tabla de propiedades ── -->
-        @if (getKind(schI) === 'object') {
-          <div class="col-span-2 flex flex-col gap-2">
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-medium text-gray-700">Propiedades</span>
-              <button
-                type="button"
-                (click)="forms.addProperty(schI)"
-                class="text-xs text-indigo-600 hover:text-indigo-800 transition-colors"
-              >
-                + Añadir propiedad
-              </button>
-            </div>
-
-            @if (forms.getPropertyGroups(schI).length > 0) {
-              <div class="border border-gray-200 rounded overflow-hidden" formArrayName="properties">
-                <div class="grid grid-cols-[1fr_10rem_1fr_3.5rem_2rem] gap-2 px-3 py-2 bg-gray-50 text-xs text-gray-500 font-medium border-b border-gray-200">
-                  <span>Nombre</span>
-                  <span>Tipo</span>
-                  <span>Formato / Ref / Composición</span>
-                  <span class="text-center">Req.</span>
-                  <span></span>
-                </div>
-
-                @for (prop of forms.getPropertyGroups(schI); track propI; let propI = $index) {
-                  <div
-                    [formGroupName]="propI"
-                    class="grid grid-cols-[1fr_10rem_1fr_3.5rem_2rem] gap-2 items-start px-3 py-2 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors"
-                  >
-                    <input
-                      formControlName="name"
-                      type="text"
-                      placeholder="propiedad"
-                      class="border border-gray-200 rounded px-2 py-1.5 text-xs w-full"
-                    />
-
-                    <select
-                      formControlName="type"
-                      class="border border-gray-200 rounded px-2 py-1.5 text-xs w-full"
-                    >
-                      @for (pt of propertyTypes; track pt) {
-                        <option [value]="pt">{{ pt }}</option>
-                      }
-                    </select>
-
-                    @if (isComposedType(getPropType(schI, propI))) {
-                      <!-- allOf / oneOf / anyOf: multi-select -->
-                      @if (state.getSchemaNamesExcluding(schI).length > 0) {
-                        <select
-                          formControlName="composedSchemas"
-                          multiple
-                          class="border border-gray-200 rounded px-2 py-1 text-xs w-full h-16"
-                          title="Ctrl+click para seleccionar múltiples"
-                        >
-                          @for (s of state.getSchemaNamesExcluding(schI); track s) {
-                            <option [value]="s">{{ s }}</option>
-                          }
-                        </select>
-                      } @else {
-                        <span class="text-xs text-gray-400 italic">Sin schemas</span>
-                      }
-                    } @else if (isRefType(getPropType(schI, propI))) {
-                      <!-- $ref / $ref[] / not: single select -->
-                      <select
-                        formControlName="refSchema"
-                        class="border border-gray-200 rounded px-2 py-1.5 text-xs w-full"
-                      >
-                        <option value="">— schema —</option>
-                        @for (s of state.getSchemaNamesExcluding(schI); track s) {
-                          <option [value]="s">{{ s }}</option>
-                        }
-                      </select>
-                    } @else if (getFormatsForType(getPropType(schI, propI)).length > 0) {
-                      <!-- string / number / integer: format -->
-                      <select
-                        formControlName="format"
-                        class="border border-gray-200 rounded px-2 py-1.5 text-xs w-full"
-                      >
-                        @for (f of getFormatsForType(getPropType(schI, propI)); track f) {
-                          <option [value]="f">{{ f || '—' }}</option>
-                        }
-                      </select>
-                    } @else {
-                      <span class="text-xs text-gray-300 text-center">—</span>
-                    }
-
-                    <div class="flex justify-center items-center">
-                      <input type="checkbox" formControlName="required" class="w-4 h-4" />
-                    </div>
-
-                    <button
-                      type="button"
-                      (click)="forms.removeProperty(schI, propI)"
-                      class="flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors text-base"
-                    >
-                      ×
-                    </button>
-                  </div>
-                }
-              </div>
-            } @else {
-              <p class="text-xs text-gray-400 italic">Sin propiedades. Añade la primera.</p>
-            }
-          </div>
-        }
-
-        <!-- ── ARRAY: tipo de los items ── -->
-        @if (getKind(schI) === 'array') {
-          <div class="flex flex-col gap-1">
-            <label [for]="'itemsKind-' + schI" class="text-sm font-medium">Tipo de items</label>
-            <select
-              [id]="'itemsKind-' + schI"
-              formControlName="itemsKind"
-              class="border border-gray-300 rounded px-3 py-2 text-sm"
-            >
-              <option value="primitive">Primitivo</option>
-              <option value="$ref">Referencia ($ref)</option>
-            </select>
-          </div>
-
-          @if (getItemsKind(schI) === 'primitive') {
-            <div class="flex flex-col gap-1">
-              <label [for]="'itemsType-' + schI" class="text-sm font-medium">Tipo primitivo</label>
-              <select
-                [id]="'itemsType-' + schI"
-                formControlName="itemsType"
-                class="border border-gray-300 rounded px-3 py-2 text-sm"
+                [id]="'type-' + schI"
+                formControlName="type"
+                class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
               >
                 @for (t of primitiveTypes; track t) {
                   <option [value]="t">{{ t }}</option>
                 }
               </select>
             </div>
+
+            @if (getFormatsForType(getPrimitiveType(schI)).length > 0) {
+              <div class="flex flex-col gap-1.5">
+                <label [for]="'format-' + schI" class="text-xs font-semibold text-text-secondary">Format</label>
+                <select
+                  [id]="'format-' + schI"
+                  formControlName="format"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+                >
+                  @for (f of getFormatsForType(getPrimitiveType(schI)); track f) {
+                    <option [value]="f">{{ f || '— none —' }}</option>
+                  }
+                </select>
+              </div>
+            }
+
+            <div class="col-span-2 flex flex-col gap-1.5">
+              <label [for]="'example-' + schI" class="text-xs font-semibold text-text-secondary">Example</label>
+              <input
+                [id]="'example-' + schI"
+                type="text"
+                formControlName="example"
+                placeholder="john@example.com"
+                class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+              />
+            </div>
+
+            @if (isEnumFormat(schema.get('format')?.value)) {
+              <div class="col-span-2 flex flex-col gap-1.5">
+                <label [for]="'enum-' + schI" class="text-xs font-semibold text-text-primary">
+                  Enum Values
+                </label>
+                <textarea
+                  [id]="'enum-' + schI"
+                  formControlName="enumValues"
+                  placeholder="value1, value2, value3"
+                  rows="3"
+                  class="w-full px-2 py-1 border border-border-light rounded text-sm font-mono resize-none bg-surface-alt text-text-primary transition-colors"
+                  aria-label="Enum values, comma-separated">
+                </textarea>
+                <p class="text-[11px] text-text-muted">
+                  Comma-separated values (e.g., red, blue, green)
+                </p>
+
+                @if (schema.get('enumValues')?.hasError('enumInvalidChar')) {
+                  <p class="text-[11px] text-danger mt-1">
+                    ⚠️ {{ schema.get('enumValues')?.getError('enumInvalidChar').message }}
+                  </p>
+                }
+              </div>
+            }
           }
 
-          @if (getItemsKind(schI) === '$ref') {
-            <div class="flex flex-col gap-1">
-              <label [for]="'itemsRef-' + schI" class="text-sm font-medium">Schema de los items</label>
+          <!-- OBJECT: properties table -->
+          @if (getKind(schI) === 'object') {
+            <div class="col-span-2 flex flex-col gap-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">Properties</span>
+                <button
+                  type="button"
+                  (click)="addProperty(schI)"
+                  class="flex items-center gap-1 text-xs text-accent hover:text-accent-hover transition-colors font-medium">
+                  <lucide-icon name="plus" [size]="14"></lucide-icon>
+                  Add Property
+                </button>
+              </div>
+
+              @if (forms.getPropertyGroups(schI).length > 0) {
+                <div class="border border-border-light rounded-lg overflow-hidden" formArrayName="properties">
+                  <div class="grid gap-2 px-3 py-2 bg-surface-alt text-[11px] text-text-tertiary font-semibold uppercase tracking-wide border-b border-border-light"
+                       [style.grid-template-columns]="hasAnyEnumFormat(schI) ? '1fr 10rem 1fr 1fr 3.5rem 2rem' : '1fr 10rem 1fr 3.5rem 2rem'">
+                    <span>Name</span>
+                    <span>Type</span>
+                    <span>Format / Ref</span>
+                    @if (hasAnyEnumFormat(schI)) {
+                      <span>Enum</span>
+                    }
+                    <span class="text-center">Req.</span>
+                    <span></span>
+                  </div>
+
+                  @for (prop of forms.getPropertyGroups(schI); track propI; let propI = $index) {
+                    <div
+                      [formGroupName]="propI"
+                      class="grid gap-2 items-start px-3 py-2 border-b border-border-row last:border-b-0 hover:bg-surface-alt/50 transition-colors"
+                      [style.grid-template-columns]="hasAnyEnumFormat(schI) ? '1fr 10rem 1fr 1fr 3.5rem 2rem' : '1fr 10rem 1fr 3.5rem 2rem'"
+                    >
+                      <input
+                        formControlName="name"
+                        type="text"
+                        placeholder="property"
+                        class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                      />
+
+                      <select
+                        formControlName="type"
+                        class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                      >
+                        @for (pt of propertyTypes; track pt) {
+                          <option [value]="pt">{{ pt }}</option>
+                        }
+                      </select>
+
+                      @if (isComposedType(getPropType(schI, propI))) {
+                        @if (state.getSchemaNamesExcluding(schI).length > 0) {
+                          <select
+                            formControlName="composedSchemas"
+                            multiple
+                            class="border border-border-light rounded-md px-2 py-1 text-xs w-full h-16 bg-surface-alt text-text-primary transition-colors"
+                            title="Ctrl+click for multiple"
+                          >
+                            @for (s of state.getSchemaNamesExcluding(schI); track s) {
+                              <option [value]="s">{{ s }}</option>
+                            }
+                          </select>
+                        } @else {
+                          <span class="text-xs text-text-muted italic">No schemas</span>
+                        }
+                      } @else if (isRefType(getPropType(schI, propI))) {
+                        <select
+                          formControlName="refSchema"
+                          class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                        >
+                          <option value="">— schema —</option>
+                          @for (s of state.getSchemaNamesExcluding(schI); track s) {
+                            <option [value]="s">{{ s }}</option>
+                          }
+                        </select>
+                      } @else if (getFormatsForType(getPropType(schI, propI)).length > 0) {
+                        <select
+                          formControlName="format"
+                          class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                        >
+                          @for (f of getFormatsForType(getPropType(schI, propI)); track f) {
+                            <option [value]="f">{{ f || '—' }}</option>
+                          }
+                        </select>
+                      } @else {
+                        <span class="text-xs text-text-muted text-center">—</span>
+                      }
+
+                      @if (hasAnyEnumFormat(schI)) {
+                        @if (isEnumFormat(getPropFormat(schI, propI))) {
+                          <div class="flex flex-col gap-1">
+                            <textarea
+                              formControlName="enumValues"
+                              placeholder="val1, val2"
+                              rows="2"
+                              class="w-full px-2 py-1 border border-border-light rounded text-[12px] font-mono resize-none bg-surface-alt text-text-primary transition-colors"
+                              aria-label="Property enum values">
+                            </textarea>
+                            @if (prop.get('enumValues')?.hasError('enumInvalidChar')) {
+                              <p class="text-[10px] text-danger">Invalid characters</p>
+                            }
+                          </div>
+                        } @else {
+                          <span></span>
+                        }
+                      }
+
+                      <div class="flex justify-center items-center">
+                        <input type="checkbox" formControlName="required" class="w-4 h-4 accent-accent" />
+                      </div>
+
+                      <button
+                        type="button"
+                        (click)="forms.removeProperty(schI, propI)"
+                        class="flex items-center justify-center text-text-muted hover:text-danger transition-colors">
+                        <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="text-xs text-text-muted italic">No properties. Add the first one.</p>
+              }
+            </div>
+
+            <!-- OBJECT: additionalProperties -->
+            <div class="col-span-2 flex items-center gap-3">
+              <input
+                type="checkbox"
+                formControlName="additionalPropsEnabled"
+                class="w-4 h-4 accent-accent"
+              />
+              <label class="text-xs font-semibold text-text-secondary uppercase tracking-wide">
+                Additional Properties
+              </label>
+            </div>
+
+            @if (schema.get('additionalPropsEnabled')?.value) {
+              <div class="col-span-2 grid grid-cols-2 gap-3 border-l-2 border-accent pl-4">
+                <!-- Type selector -->
+                <div class="flex flex-col gap-1.5">
+                  <label [for]="'additionalPropsType-' + schI" class="text-xs font-semibold text-text-secondary">
+                    Type
+                  </label>
+                  <select
+                    [id]="'additionalPropsType-' + schI"
+                    formControlName="additionalPropsType"
+                    class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+                  >
+                    @for (pt of propertyTypes; track pt) {
+                      <option [value]="pt">{{ pt }}</option>
+                    }
+                  </select>
+                </div>
+
+                <!-- Format/Ref/Composed selector based on type -->
+                @if (isComposedType(schema.get('additionalPropsType')?.value ?? 'string')) {
+                  @if (state.getSchemaNamesExcluding(schI).length > 0) {
+                    <div class="flex flex-col gap-1.5">
+                      <label [for]="'additionalPropsComposed-' + schI" class="text-xs font-semibold text-text-secondary">
+                        Schemas
+                      </label>
+                      <select
+                        [id]="'additionalPropsComposed-' + schI"
+                        formControlName="additionalPropsComposed"
+                        multiple
+                        class="border border-border-light rounded-md px-2 py-1 text-xs w-full h-16 bg-surface-alt text-text-primary transition-colors"
+                        title="Ctrl+click for multiple"
+                      >
+                        @for (s of state.getSchemaNamesExcluding(schI); track s) {
+                          <option [value]="s">{{ s }}</option>
+                        }
+                      </select>
+                    </div>
+                  } @else {
+                    <span class="text-xs text-text-muted italic">No schemas</span>
+                  }
+                } @else if (isRefType(schema.get('additionalPropsType')?.value ?? 'string')) {
+                  <div class="flex flex-col gap-1.5">
+                    <label [for]="'additionalPropsRef-' + schI" class="text-xs font-semibold text-text-secondary">
+                      Schema
+                    </label>
+                    <select
+                      [id]="'additionalPropsRef-' + schI"
+                      formControlName="additionalPropsRef"
+                      class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+                    >
+                      <option value="">— schema —</option>
+                      @for (s of state.getSchemaNamesExcluding(schI); track s) {
+                        <option [value]="s">{{ s }}</option>
+                      }
+                    </select>
+                  </div>
+                } @else if (getFormatsForType(schema.get('additionalPropsType')?.value ?? 'string').length > 0) {
+                  <div class="flex flex-col gap-1.5">
+                    <label [for]="'additionalPropsFormat-' + schI" class="text-xs font-semibold text-text-secondary">
+                      Format
+                    </label>
+                    <select
+                      [id]="'additionalPropsFormat-' + schI"
+                      formControlName="additionalPropsFormat"
+                      class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+                    >
+                      @for (f of getFormatsForType(schema.get('additionalPropsType')?.value ?? 'string'); track f) {
+                        <option [value]="f">{{ f || '— none —' }}</option>
+                      }
+                    </select>
+                  </div>
+                }
+
+                <!-- Enum values (only if format === 'enum') -->
+                @if (isEnumFormat(schema.get('additionalPropsFormat')?.value)) {
+                  <div class="col-span-2 flex flex-col gap-1.5">
+                    <label [for]="'additionalPropsEnum-' + schI" class="text-xs font-semibold text-text-primary">
+                      Enum Values
+                    </label>
+                    <textarea
+                      [id]="'additionalPropsEnum-' + schI"
+                      formControlName="additionalPropsEnum"
+                      placeholder="value1, value2, value3"
+                      rows="3"
+                      class="w-full px-2 py-1 border border-border-light rounded text-sm font-mono resize-none bg-surface-alt text-text-primary transition-colors"
+                      aria-label="Enum values, comma-separated">
+                    </textarea>
+                    <p class="text-[11px] text-text-muted">
+                      Comma-separated values (e.g., red, blue, green)
+                    </p>
+                    @if (schema.get('additionalPropsEnum')?.hasError('enumInvalidChar')) {
+                      <p class="text-[11px] text-danger mt-1">
+                        ⚠️ {{ schema.get('additionalPropsEnum')?.getError('enumInvalidChar').message }}
+                      </p>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          }
+
+          <!-- ARRAY -->
+          @if (getKind(schI) === 'array') {
+            <div class="flex flex-col gap-1.5">
+              <label [for]="'itemsKind-' + schI" class="text-xs font-semibold text-text-secondary">Items type</label>
+              <select
+                [id]="'itemsKind-' + schI"
+                formControlName="itemsKind"
+                class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+              >
+                <option value="primitive">Primitive</option>
+                <option value="$ref">Reference ($ref)</option>
+              </select>
+            </div>
+
+            @if (getItemsKind(schI) === 'primitive') {
+              <div class="flex flex-col gap-1.5">
+                <label [for]="'itemsType-' + schI" class="text-xs font-semibold text-text-secondary">Primitive type</label>
+                <select
+                  [id]="'itemsType-' + schI"
+                  formControlName="itemsType"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+                >
+                  @for (t of primitiveTypes; track t) {
+                    <option [value]="t">{{ t }}</option>
+                  }
+                </select>
+              </div>
+            }
+
+            @if (getItemsKind(schI) === '$ref') {
+              <div class="flex flex-col gap-1.5">
+                <label [for]="'itemsRef-' + schI" class="text-xs font-semibold text-text-secondary">Items schema</label>
+                @if (state.getSchemaNamesExcluding(schI).length > 0) {
+                  <select
+                    [id]="'itemsRef-' + schI"
+                    formControlName="itemsRef"
+                    class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+                  >
+                    <option value="">— select a schema —</option>
+                    @for (s of state.getSchemaNamesExcluding(schI); track s) {
+                      <option [value]="s">{{ s }}</option>
+                    }
+                  </select>
+                } @else {
+                  <p class="text-xs text-text-muted italic py-2">No other schemas defined yet.</p>
+                }
+              </div>
+            }
+          }
+
+          <!-- $REF / NOT -->
+          @if (getKind(schI) === '$ref' || getKind(schI) === 'not') {
+            <div class="col-span-2 flex flex-col gap-1.5">
+              <label [for]="'refSchema-' + schI" class="text-xs font-semibold text-text-secondary">
+                {{ getKind(schI) === 'not' ? 'Negated schema (not)' : 'Referenced schema ($ref)' }}
+              </label>
               @if (state.getSchemaNamesExcluding(schI).length > 0) {
                 <select
-                  [id]="'itemsRef-' + schI"
-                  formControlName="itemsRef"
-                  class="border border-gray-300 rounded px-3 py-2 text-sm"
+                  [id]="'refSchema-' + schI"
+                  formControlName="refSchema"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
                 >
-                  <option value="">— selecciona un schema —</option>
+                  <option value="">— select a schema —</option>
                   @for (s of state.getSchemaNamesExcluding(schI); track s) {
                     <option [value]="s">{{ s }}</option>
                   }
                 </select>
               } @else {
-                <p class="text-xs text-gray-400 italic py-2">No hay otros schemas definidos aún.</p>
+                <p class="text-xs text-text-muted italic py-2">No other schemas defined yet.</p>
               }
             </div>
           }
-        }
 
-        <!-- ── $REF / NOT: referencia única ── -->
-        @if (getKind(schI) === '$ref' || getKind(schI) === 'not') {
-          <div class="col-span-2 flex flex-col gap-1">
-            <label [for]="'refSchema-' + schI" class="text-sm font-medium">
-              {{ getKind(schI) === 'not' ? 'Schema negado (not)' : 'Schema referenciado ($ref)' }}
-            </label>
-            @if (state.getSchemaNamesExcluding(schI).length > 0) {
-              <select
-                [id]="'refSchema-' + schI"
-                formControlName="refSchema"
-                class="border border-gray-300 rounded px-3 py-2 text-sm"
-              >
-                <option value="">— selecciona un schema —</option>
-                @for (s of state.getSchemaNamesExcluding(schI); track s) {
-                  <option [value]="s">{{ s }}</option>
-                }
-              </select>
-            } @else {
-              <p class="text-xs text-gray-400 italic py-2">No hay otros schemas definidos aún.</p>
-            }
+          <!-- ALLOF / ONEOF / ANYOF -->
+          @if (getKind(schI) === 'allOf' || getKind(schI) === 'oneOf' || getKind(schI) === 'anyOf') {
+            <div class="col-span-2 flex flex-col gap-1.5">
+              <label [for]="'composedSchemas-' + schI" class="text-xs font-semibold text-text-secondary">
+                Schemas composing {{ getKind(schI) }}
+                <span class="text-[11px] text-text-muted font-normal ml-1">(Ctrl+click for multiple)</span>
+              </label>
+              @if (state.getSchemaNamesExcluding(schI).length > 0) {
+                <select
+                  [id]="'composedSchemas-' + schI"
+                  formControlName="composedSchemas"
+                  multiple
+                  class="border border-border rounded-md px-3 py-2.5 text-sm h-28 bg-surface-alt text-text-primary transition-colors"
+                >
+                  @for (s of state.getSchemaNamesExcluding(schI); track s) {
+                    <option [value]="s">{{ s }}</option>
+                  }
+                </select>
+              } @else {
+                <p class="text-xs text-text-muted italic py-2">No other schemas defined yet.</p>
+              }
+            </div>
+          }
+
+          <!-- Description -->
+          <div class="col-span-2 flex flex-col gap-1.5">
+            <label [for]="'description-' + schI" class="text-xs font-semibold text-text-secondary">Description</label>
+            <textarea
+              [id]="'description-' + schI"
+              formControlName="description"
+              placeholder="Schema description..."
+              rows="3"
+              class="border border-border rounded-md px-3 py-2.5 text-sm resize-y bg-surface-alt text-text-primary transition-colors"
+            ></textarea>
           </div>
-        }
-
-        <!-- ── ALLOF / ONEOF / ANYOF: multi-selección ── -->
-        @if (getKind(schI) === 'allOf' || getKind(schI) === 'oneOf' || getKind(schI) === 'anyOf') {
-          <div class="col-span-2 flex flex-col gap-1">
-            <label [for]="'composedSchemas-' + schI" class="text-sm font-medium">
-              Schemas que componen el {{ getKind(schI) }}
-              <span class="text-xs text-gray-400 font-normal ml-1">(Ctrl+click para múltiples)</span>
-            </label>
-            @if (state.getSchemaNamesExcluding(schI).length > 0) {
-              <select
-                [id]="'composedSchemas-' + schI"
-                formControlName="composedSchemas"
-                multiple
-                class="border border-gray-300 rounded px-3 py-2 text-sm h-28"
-              >
-                @for (s of state.getSchemaNamesExcluding(schI); track s) {
-                  <option [value]="s">{{ s }}</option>
-                }
-              </select>
-            } @else {
-              <p class="text-xs text-gray-400 italic py-2">No hay otros schemas definidos aún.</p>
-            }
-          </div>
-        }
-
-        <!-- Descripción (siempre visible) -->
-        <div class="col-span-2 flex flex-col gap-1">
-          <label [for]="'description-' + schI" class="text-sm font-medium">Descripción</label>
-          <textarea
-            [id]="'description-' + schI"
-            formControlName="description"
-            placeholder="Descripción del schema..."
-            rows="3"
-            class="border border-gray-300 rounded px-3 py-2 text-sm resize-y"
-          ></textarea>
-        </div>
-
-      </form>
-    </app-panel>
+        </form>
+      </div>
+    </div>
   }
-
-  <div class="mt-2">
-    <app-button label="+ Añadir schema" type="button" (pressed)="forms.addSchema()" />
-  </div>
 </app-main-layout>

@@ -1,58 +1,68 @@
 <app-main-layout>
-  <h2 class="text-2xl font-bold mb-4">Tags</h2>
+  <!-- Content Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <lucide-icon name="tag" [size]="24" class="text-accent"></lucide-icon>
+      <div>
+        <h2 class="text-xl font-semibold text-text-primary">Tags</h2>
+        <p class="text-sm text-text-secondary">Group your API operations with tags</p>
+      </div>
+    </div>
+    <button
+      (click)="forms.addTag()"
+      class="flex items-center gap-2 bg-accent text-text-on-dark text-sm font-semibold rounded-md px-5 py-2.5 hover:bg-accent-hover transition-colors">
+      <lucide-icon name="plus" [size]="16"></lucide-icon>
+      Add Tag
+    </button>
+  </div>
 
   @for (tag of forms.tagGroups; track $index) {
     <app-panel>
-      <div class="flex justify-between items-center mb-3">
-        <span class="text-sm font-semibold text-gray-500">Tag {{ $index + 1 }}</span>
+      <div class="flex justify-between items-center mb-4">
+        <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">Tag {{ $index + 1 }}</span>
         @if (forms.tagsForm.length > 1) {
           <button
             (click)="forms.removeTag($index)"
-            class="text-xs text-red-500 hover:text-red-700 transition-colors"
-          >
-            Eliminar
+            class="text-text-muted hover:text-danger transition-colors">
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
           </button>
         }
       </div>
 
-      <form [formGroup]="tag" class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1">
-          <label [for]="'name-' + $index" class="text-sm font-medium">Nombre</label>
+      <form [formGroup]="tag" class="grid grid-cols-2 gap-5">
+        <div class="flex flex-col gap-1.5">
+          <label [for]="'name-' + $index" class="text-xs font-semibold text-text-secondary">Name</label>
           <input
             [id]="'name-' + $index"
             type="text"
             formControlName="name"
             placeholder="petStore"
-            class="border border-gray-300 rounded px-3 py-2 text-sm"
+            class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
           />
         </div>
 
-        <div class="flex flex-col gap-1">
-          <label [for]="'externalDocsUrl-' + $index" class="text-sm font-medium">External Docs URL</label>
+        <div class="flex flex-col gap-1.5">
+          <label [for]="'externalDocsUrl-' + $index" class="text-xs font-semibold text-text-secondary">External Docs URL</label>
           <input
             [id]="'externalDocsUrl-' + $index"
             type="url"
             formControlName="externalDocsUrl"
             placeholder="https://docs.example.com"
-            class="border border-gray-300 rounded px-3 py-2 text-sm"
+            class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
           />
         </div>
 
-        <div class="col-span-2 flex flex-col gap-1">
-          <label [for]="'description-' + $index" class="text-sm font-medium">Descripción</label>
+        <div class="col-span-2 flex flex-col gap-1.5">
+          <label [for]="'description-' + $index" class="text-xs font-semibold text-text-secondary">Description</label>
           <textarea
             [id]="'description-' + $index"
             formControlName="description"
-            placeholder="Descripción del tag..."
+            placeholder="Tag description..."
             rows="3"
-            class="border border-gray-300 rounded px-3 py-2 text-sm resize-y"
+            class="border border-border rounded-md px-3 py-2.5 text-sm resize-y bg-surface-alt text-text-primary transition-colors"
           ></textarea>
         </div>
       </form>
     </app-panel>
   }
-
-  <div class="mt-2">
-    <app-button label="+ Añadir tag" type="button" (pressed)="forms.addTag()" />
-  </div>
 </app-main-layout>

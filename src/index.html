@@ -5,7 +5,29 @@
   <title>OpenApiStudioWeb</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'sha256-vWZOQj7sFngJdCXcDCqcLpYqzGEsKDhYADaQDx5BxpQ=';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    font-src 'self' data:;
+    connect-src 'self';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+    object-src 'none';
+  ">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    try {
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <app-root></app-root>

@@ -74,11 +74,14 @@ export type OpenApiSchemaObject =
   | OpenApiComposedSchema
   | OpenApiNotSchema;
 
+export type OpenApiAdditionalProperties = false | OpenApiSchemaObject;
+
 export interface OpenApiObjectSchema {
   type: 'object';
   description?: string;
   properties?: Record<string, OpenApiSchemaObject>;
   required?: string[];
+  additionalProperties?: OpenApiAdditionalProperties;
 }
 
 export interface OpenApiPrimitiveSchema {
@@ -86,6 +89,7 @@ export interface OpenApiPrimitiveSchema {
   description?: string;
   format?: string;
   example?: string;
+  enum?: string[] | number[] | boolean[];
 }
 
 export interface OpenApiArraySchema {

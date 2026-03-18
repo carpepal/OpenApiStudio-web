@@ -45,7 +45,9 @@ export interface PropertyFormValue {
   refSchema: string;
   composedSchemas: string[];
   required: boolean;
+  enumValues: string;
 }
+
 
 export interface SchemaFormValue {
   name: string;
@@ -55,8 +57,15 @@ export interface SchemaFormValue {
   type: string;
   format: string;
   example: string;
+  enumValues: string;
   // object
   properties: PropertyFormValue[];
+  additionalPropsEnabled: boolean;
+  additionalPropsType: string;
+  additionalPropsFormat: string;
+  additionalPropsRef: string;
+  additionalPropsComposed: string[];
+  additionalPropsEnum: string;
   // array
   itemsKind: 'primitive' | '$ref';
   itemsType: string;

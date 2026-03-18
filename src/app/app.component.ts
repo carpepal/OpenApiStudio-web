@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { PreviewComponent } from './components/preview/preview.component';
@@ -11,33 +11,33 @@ import { AsideComponent } from './components/aside.component/aside.component';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  title = 'open-api-studio-web';
-  activePreview = false;
-  previewWidth = 380;
-  isResizing = false;
+  readonly title = 'open-api-studio-web';
+  readonly activePreview = signal(false);
+  readonly previewWidth = signal(380);
+  readonly isResizing = signal(false);
   private resizeStartX = 0;
   private resizeStartWidth = 0;
 
   togglePreview() {
-    this.activePreview = !this.activePreview;
+    this.activePreview.update(value => !value);
   }
 
   startResize(event: MouseEvent) {
-    this.isResizing = true;
+    this.isResizing.set(true);
     this.resizeStartX = event.clientX;
-    this.resizeStartWidth = this.previewWidth;
+    this.resizeStartWidth = this.previewWidth();
     event.preventDefault();
   }
 
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
-    if (!this.isResizing) return;
+    if (!this.isResizing()) return;
     const delta = this.resizeStartX - event.clientX;
-    this.previewWidth = Math.max(200, Math.min(900, this.resizeStartWidth + delta));
+    this.previewWidth.set(Math.max(200, Math.min(900, this.resizeStartWidth + delta)));
   }
 
   @HostListener('document:mouseup')
   onMouseUp() {
-    this.isResizing = false;
+    this.isResizing.set(false);
   }
 }

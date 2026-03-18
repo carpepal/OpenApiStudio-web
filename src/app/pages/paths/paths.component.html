@@ -1,421 +1,445 @@
 <app-main-layout>
-  <h2 class="text-2xl font-bold mb-4">Paths</h2>
+  <!-- Content Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <lucide-icon name="route" [size]="24" class="text-accent"></lucide-icon>
+      <div>
+        <h2 class="text-xl font-semibold text-text-primary">Paths</h2>
+        <p class="text-sm text-text-secondary">Define your API endpoints and their operations</p>
+      </div>
+    </div>
+    <button
+      (click)="forms.addPath()"
+      class="flex items-center gap-2 bg-accent text-text-on-dark text-sm font-semibold rounded-md px-5 py-2.5 hover:bg-accent-hover transition-colors">
+      <lucide-icon name="plus" [size]="16"></lucide-icon>
+      Add Endpoint
+    </button>
+  </div>
 
   @for (endpoint of forms.pathGroups; track pathI; let pathI = $index) {
-    <app-panel>
-      <div class="flex justify-between items-center mb-3">
-        <span class="text-sm font-semibold text-gray-500">Endpoint {{ pathI + 1 }}</span>
+    <div class="mb-4 rounded-xl bg-surface-muted overflow-hidden transition-colors"
+         [class.border]="forms.isPathMethodDuplicate(pathI)"
+         [class.border-danger]="forms.isPathMethodDuplicate(pathI)">
+      <!-- Panel Header -->
+      <div class="flex items-center gap-3 px-5 py-3.5 bg-surface-alt">
+        <span class="px-2.5 py-1 text-[11px] font-bold rounded uppercase tracking-wide {{ getMethodBadgeClass(endpoint.get('method')?.value) }}">
+          {{ endpoint.get('method')?.value?.toUpperCase() || 'GET' }}
+        </span>
+        <span class="font-mono text-sm font-medium text-text-primary">
+          {{ endpoint.get('path')?.value || '/path' }}
+        </span>
+        <div class="flex-1"></div>
+        @if (forms.isPathMethodDuplicate(pathI)) {
+          <lucide-icon name="triangle-alert" [size]="18" class="text-danger"></lucide-icon>
+        } @else {
+          <lucide-icon name="circle-check" [size]="18" class="text-success"></lucide-icon>
+        }
         @if (forms.pathsForm.length > 1) {
           <button
             (click)="forms.removePath(pathI)"
-            class="text-xs text-red-500 hover:text-red-700 transition-colors"
-          >
-            Eliminar
+            class="text-text-muted hover:text-danger transition-colors">
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
           </button>
         }
       </div>
 
-      <form [formGroup]="endpoint" class="grid grid-cols-2 gap-4">
-
-        <div class="flex flex-col gap-1">
-          <label [for]="'path-' + pathI" class="text-sm font-medium">Path</label>
-          <input
-            [id]="'path-' + pathI"
-            type="text"
-            formControlName="path"
-            placeholder="/users/{id}"
-            class="border rounded px-3 py-2 text-sm"
-            [class.border-red-400]="forms.isPathMethodDuplicate(pathI)"
-            [class.border-gray-300]="!forms.isPathMethodDuplicate(pathI)"
-            (input)="syncPathParams(pathI, $any($event.target).value)"
-          />
+      <!-- Validation Error Bar -->
+      @if (forms.isPathMethodDuplicate(pathI)) {
+        <div class="flex items-center gap-2 px-5 py-2.5 bg-danger-bg">
+          <lucide-icon name="circle-alert" [size]="16" class="text-danger"></lucide-icon>
+          <span class="text-xs font-medium text-danger">Duplicate path and method combination. Each path+method must be unique.</span>
         </div>
+      }
 
-        <div class="flex flex-col gap-1">
-          <label [for]="'method-' + pathI" class="text-sm font-medium">Método</label>
-          <select
-            [id]="'method-' + pathI"
-            formControlName="method"
-            class="border rounded px-3 py-2 text-sm"
-            [class.border-red-400]="forms.isPathMethodDuplicate(pathI)"
-            [class.border-gray-300]="!forms.isPathMethodDuplicate(pathI)"
-            (change)="onMethodChange(pathI, $any($event.target).value)"
-          >
-            @for (m of methods; track m) {
-              <option [value]="m">{{ m.toUpperCase() }}</option>
+      <!-- Panel Body -->
+      <div class="p-5">
+        <form [formGroup]="endpoint" class="grid grid-cols-2 gap-5">
+          <div class="flex flex-col gap-1.5">
+            <label [for]="'path-' + pathI" class="text-xs font-semibold text-text-secondary">Path</label>
+            <input
+              [id]="'path-' + pathI"
+              type="text"
+              formControlName="path"
+              placeholder="/users/{id}"
+              class="border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+              [class.border-danger-border]="forms.isPathMethodDuplicate(pathI)"
+              [class.border-border]="!forms.isPathMethodDuplicate(pathI)"
+              (input)="onPathInput(pathI, $event)"
+            />
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label [for]="'method-' + pathI" class="text-xs font-semibold text-text-secondary">Method</label>
+            <select
+              [id]="'method-' + pathI"
+              formControlName="method"
+              class="border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+              [class.border-danger-border]="forms.isPathMethodDuplicate(pathI)"
+              [class.border-border]="!forms.isPathMethodDuplicate(pathI)"
+              (change)="onMethodChange(pathI, $event)"
+            >
+              @for (m of methods; track m) {
+                <option [value]="m">{{ m.toUpperCase() }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label [for]="'summary-' + pathI" class="text-xs font-semibold text-text-secondary">Summary</label>
+            <input
+              [id]="'summary-' + pathI"
+              type="text"
+              formControlName="summary"
+              placeholder="Get user by ID"
+              class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+            />
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label [for]="'operationId-' + pathI" class="text-xs font-semibold text-text-secondary">Operation ID</label>
+            <input
+              [id]="'operationId-' + pathI"
+              type="text"
+              formControlName="operationId"
+              placeholder="getUserById"
+              class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+            />
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label [for]="'tags-' + pathI" class="text-xs font-semibold text-text-secondary">
+              Tags
+              <span class="text-[11px] text-text-muted font-normal ml-1">(Ctrl+click for multiple)</span>
+            </label>
+            @if (state.tagNames().length > 0) {
+              <select
+                [id]="'tags-' + pathI"
+                formControlName="tags"
+                multiple
+                class="border border-border rounded-md px-3 py-2.5 text-sm h-24 bg-surface-alt text-text-primary transition-colors"
+              >
+                @for (tag of state.tagNames(); track tag) {
+                  <option [value]="tag">{{ tag }}</option>
+                }
+              </select>
+            } @else {
+              <p class="text-xs text-text-muted italic py-2">
+                No tags defined. Create them in the Tags section.
+              </p>
             }
-          </select>
-          @if (forms.isPathMethodDuplicate(pathI)) {
-            <span class="text-xs text-red-500">Path y método duplicados</span>
-          }
-        </div>
+          </div>
 
-        <div class="flex flex-col gap-1">
-          <label [for]="'operationId-' + pathI" class="text-sm font-medium">Operation ID</label>
-          <input
-            [id]="'operationId-' + pathI"
-            type="text"
-            formControlName="operationId"
-            placeholder="getUserById"
-            class="border border-gray-300 rounded px-3 py-2 text-sm"
-          />
-        </div>
+          <div class="flex flex-col gap-1.5">
+            <label [for]="'security-' + pathI" class="text-xs font-semibold text-text-secondary">
+              Security
+              <span class="text-[11px] text-text-muted font-normal ml-1">(Ctrl+click for multiple)</span>
+            </label>
+            @if (state.schemeNames().length > 0) {
+              <select
+                [id]="'security-' + pathI"
+                formControlName="security"
+                multiple
+                class="border border-border rounded-md px-3 py-2.5 text-sm h-24 bg-surface-alt text-text-primary transition-colors"
+              >
+                @for (scheme of state.schemeNames(); track scheme) {
+                  <option [value]="scheme">{{ scheme }}</option>
+                }
+              </select>
+            } @else {
+              <p class="text-xs text-text-muted italic py-2">
+                No security schemes. Create them in the Security section.
+              </p>
+            }
+          </div>
 
-        <div class="flex flex-col gap-1">
-          <label [for]="'summary-' + pathI" class="text-sm font-medium">Summary</label>
-          <input
-            [id]="'summary-' + pathI"
-            type="text"
-            formControlName="summary"
-            placeholder="Get user by ID"
-            class="border border-gray-300 rounded px-3 py-2 text-sm"
-          />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label [for]="'tags-' + pathI" class="text-sm font-medium">
-            Tags
-            <span class="text-xs text-gray-400 font-normal ml-1">(Ctrl+click para múltiples)</span>
-          </label>
-          @if (state.tagNames().length > 0) {
-            <select
-              [id]="'tags-' + pathI"
-              formControlName="tags"
-              multiple
-              class="border border-gray-300 rounded px-3 py-2 text-sm h-24"
-            >
-              @for (tag of state.tagNames(); track tag) {
-                <option [value]="tag">{{ tag }}</option>
-              }
-            </select>
-          } @else {
-            <p class="text-xs text-gray-400 italic py-2">
-              No hay tags definidos. Créalos en la sección Tags.
-            </p>
-          }
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label [for]="'security-' + pathI" class="text-sm font-medium">
-            Security
-            <span class="text-xs text-gray-400 font-normal ml-1">(Ctrl+click para múltiples)</span>
-          </label>
-          @if (state.schemeNames().length > 0) {
-            <select
-              [id]="'security-' + pathI"
-              formControlName="security"
-              multiple
-              class="border border-gray-300 rounded px-3 py-2 text-sm h-24"
-            >
-              @for (scheme of state.schemeNames(); track scheme) {
-                <option [value]="scheme">{{ scheme }}</option>
-              }
-            </select>
-          } @else {
-            <p class="text-xs text-gray-400 italic py-2">
-              No hay esquemas de seguridad. Créalos en la sección Security.
-            </p>
-          }
-        </div>
-
-        <!-- ── PATH PARAMETERS (auto-detectados) ── -->
-        @if (forms.getPathParamGroups(pathI).length > 0) {
-          <div class="col-span-2 flex flex-col gap-2" formArrayName="pathParams">
-            <span class="text-sm font-medium text-gray-700">
-              Path Parameters
-              <span class="text-xs text-gray-400 font-normal ml-1">(detectados del path)</span>
-            </span>
-            <div class="border border-gray-200 rounded overflow-hidden">
-              <div class="grid grid-cols-[6rem_10rem_1fr] gap-2 px-3 py-2 bg-gray-50 text-xs text-gray-500 font-medium border-b border-gray-200">
-                <span>Nombre</span>
-                <span>Tipo</span>
-                <span>Descripción</span>
-              </div>
-              @for (param of forms.getPathParamGroups(pathI); track paramI; let paramI = $index) {
-                <div
-                  [formGroupName]="paramI"
-                  class="grid grid-cols-[6rem_10rem_1fr] gap-2 items-center px-3 py-2 border-b border-gray-100 last:border-b-0"
-                >
-                  <span class="text-xs font-mono text-indigo-600">{{ '{' + param.get('name')?.value + '}' }}</span>
-                  <select
-                    formControlName="type"
-                    class="border border-gray-200 rounded px-2 py-1.5 text-xs w-full"
-                  >
-                    @for (t of paramTypes; track t) {
-                      <option [value]="t">{{ t }}</option>
-                    }
-                  </select>
-                  <input
-                    formControlName="description"
-                    type="text"
-                    placeholder="Descripción..."
-                    class="border border-gray-200 rounded px-2 py-1.5 text-xs w-full"
-                  />
+          <!-- PATH PARAMETERS -->
+          @if (forms.getPathParamGroups(pathI).length > 0) {
+            <div class="col-span-2 flex flex-col gap-3 border-t border-border-light pt-5" formArrayName="pathParams">
+              <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">
+                Path Parameters
+                <span class="text-[11px] text-text-muted font-normal normal-case ml-1">(auto-detected from path)</span>
+              </span>
+              <div class="border border-border-light rounded-lg overflow-hidden">
+                <div class="grid grid-cols-[6rem_10rem_1fr] gap-2 px-3 py-2 bg-surface-alt text-[11px] text-text-tertiary font-semibold uppercase tracking-wide border-b border-border-light">
+                  <span>Name</span>
+                  <span>Type</span>
+                  <span>Description</span>
                 </div>
-              }
-            </div>
-          </div>
-        }
-
-        <!-- ── QUERY PARAMETERS (manuales) ── -->
-        <div class="col-span-2 flex flex-col gap-2" formArrayName="queryParams">
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-medium text-gray-700">Query Parameters</span>
-            <button
-              type="button"
-              (click)="forms.addQueryParam(pathI)"
-              class="text-xs text-indigo-600 hover:text-indigo-800 transition-colors"
-            >
-              + Añadir parámetro
-            </button>
-          </div>
-
-          @if (forms.getQueryParamGroups(pathI).length > 0) {
-            <div class="border border-gray-200 rounded overflow-hidden">
-              <div class="grid grid-cols-[1fr_8rem_3.5rem_1fr_2rem] gap-2 px-3 py-2 bg-gray-50 text-xs text-gray-500 font-medium border-b border-gray-200">
-                <span>Nombre</span>
-                <span>Tipo</span>
-                <span class="text-center">Req.</span>
-                <span>Descripción</span>
-                <span></span>
-              </div>
-              @for (param of forms.getQueryParamGroups(pathI); track paramI; let paramI = $index) {
-                <div
-                  [formGroupName]="paramI"
-                  class="grid grid-cols-[1fr_8rem_3.5rem_1fr_2rem] gap-2 items-center px-3 py-2 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors"
-                >
-                  <input
-                    formControlName="name"
-                    type="text"
-                    placeholder="page"
-                    class="border border-gray-200 rounded px-2 py-1.5 text-xs w-full"
-                  />
-                  <select
-                    formControlName="type"
-                    class="border border-gray-200 rounded px-2 py-1.5 text-xs w-full"
+                @for (param of forms.getPathParamGroups(pathI); track paramI; let paramI = $index) {
+                  <div
+                    [formGroupName]="paramI"
+                    class="grid grid-cols-[6rem_10rem_1fr] gap-2 items-center px-3 py-2 border-b border-border-row last:border-b-0"
                   >
-                    @for (t of paramTypes; track t) {
-                      <option [value]="t">{{ t }}</option>
-                    }
-                  </select>
-                  <div class="flex justify-center">
-                    <input type="checkbox" formControlName="required" class="w-4 h-4" />
-                  </div>
-                  <input
-                    formControlName="description"
-                    type="text"
-                    placeholder="Descripción..."
-                    class="border border-gray-200 rounded px-2 py-1.5 text-xs w-full"
-                  />
-                  <button
-                    type="button"
-                    (click)="forms.removeQueryParam(pathI, paramI)"
-                    class="flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors text-base"
-                  >
-                    ×
-                  </button>
-                </div>
-              }
-            </div>
-          } @else {
-            <p class="text-xs text-gray-400 italic">Sin parámetros de query.</p>
-          }
-        </div>
-
-        <!-- ── REQUEST BODY ── -->
-        @if (!forms.isMethodWithoutBody(endpoint.get('method')?.value)) {
-        <div class="col-span-2 flex flex-col gap-2" formArrayName="requestBody">
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-medium text-gray-700">Request Body</span>
-            <button
-              type="button"
-              (click)="forms.addRequestBodyContent(pathI)"
-              class="text-xs text-indigo-600 hover:text-indigo-800 transition-colors"
-            >
-              + Añadir content
-            </button>
-          </div>
-
-          @if (forms.getRequestBodyGroups(pathI).length > 0) {
-            <div class="border border-gray-200 rounded overflow-hidden">
-              <div class="grid grid-cols-[10rem_1fr_2rem] gap-2 px-3 py-2 bg-gray-50 text-xs text-gray-500 font-medium border-b border-gray-200">
-                <span>MIME type</span>
-                <span>Schema</span>
-                <span></span>
-              </div>
-              @for (content of forms.getRequestBodyGroups(pathI); track contI; let contI = $index) {
-                <div
-                  [formGroupName]="contI"
-                  class="grid grid-cols-[10rem_1fr_2rem] gap-2 items-center px-3 py-2 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors"
-                >
-                  <select
-                    formControlName="mimeType"
-                    class="border border-gray-200 rounded px-2 py-1.5 text-xs w-full"
-                  >
-                    <option value="application/json">application/json</option>
-                    <option value="application/xml">application/xml</option>
-                    <option value="multipart/form-data">multipart/form-data</option>
-                    <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
-                    <option value="text/plain">text/plain</option>
-                  </select>
-                  @if (state.schemaNames().length > 0) {
+                    <span class="text-xs font-mono text-accent">{{ '{' + param.get('name')?.value + '}' }}</span>
                     <select
-                      formControlName="schema"
-                      class="border border-gray-200 rounded px-2 py-1.5 text-xs w-full"
+                      formControlName="type"
+                      class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                     >
-                      <option value="">— ninguno —</option>
-                      @for (schema of state.schemaNames(); track schema) {
-                        <option [value]="schema">{{ schema }}</option>
+                      @for (t of paramTypes; track t) {
+                        <option [value]="t">{{ t }}</option>
                       }
                     </select>
-                  } @else {
-                    <span class="text-xs text-gray-400 italic">Sin schemas</span>
-                  }
-                  <button
-                    type="button"
-                    (click)="forms.removeRequestBodyContent(pathI, contI)"
-                    class="flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors text-base"
-                  >
-                    ×
-                  </button>
-                </div>
-              }
+                    <input
+                      formControlName="description"
+                      type="text"
+                      placeholder="Description..."
+                      class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                    />
+                  </div>
+                }
+              </div>
             </div>
-          } @else {
-            <p class="text-xs text-gray-400 italic">Sin contenido definido.</p>
           }
-        </div>
-        }
 
-        <!-- ── RESPONSES ── -->
-        <div class="col-span-2 flex flex-col gap-2" formArrayName="responses">
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-medium text-gray-700">Responses</span>
-            <button
-              type="button"
-              (click)="forms.addResponse(pathI)"
-              class="text-xs text-indigo-600 hover:text-indigo-800 transition-colors"
-            >
-              + Añadir respuesta
-            </button>
-          </div>
+          <!-- QUERY PARAMETERS -->
+          <div class="col-span-2 flex flex-col gap-3 border-t border-border-light pt-5" formArrayName="queryParams">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">Query Parameters</span>
+              <button
+                type="button"
+                (click)="forms.addQueryParam(pathI)"
+                class="flex items-center gap-1 text-xs text-accent hover:text-accent-hover transition-colors font-medium">
+                <lucide-icon name="plus" [size]="14"></lucide-icon>
+                Add Parameter
+              </button>
+            </div>
 
-          @if (forms.getResponseGroups(pathI).length > 0) {
-            <div class="flex flex-col gap-2">
-              @for (response of forms.getResponseGroups(pathI); track respI; let respI = $index) {
-                <div
-                  [formGroupName]="respI"
-                  class="border rounded overflow-hidden"
-                  [class.border-red-300]="forms.isStatusCodeDuplicate(pathI, respI)"
-                  [class.border-gray-200]="!forms.isStatusCodeDuplicate(pathI, respI)"
-                >
-                  <!-- Response header: status code + description + delete -->
-                  <div class="grid grid-cols-[5rem_1fr_auto] gap-2 items-center px-3 py-2 bg-gray-50 border-b border-gray-200">
-                    <div class="flex flex-col gap-0.5">
-                      <input
-                        formControlName="statusCode"
-                        type="text"
-                        placeholder="200"
-                        class="border rounded px-2 py-1 text-xs w-full font-mono"
-                        [class.border-red-400]="forms.isStatusCodeDuplicate(pathI, respI)"
-                        [class.border-gray-200]="!forms.isStatusCodeDuplicate(pathI, respI)"
-                      />
-                      @if (forms.isStatusCodeDuplicate(pathI, respI)) {
-                        <span class="text-xs text-red-500">Código duplicado</span>
+            @if (forms.getQueryParamGroups(pathI).length > 0) {
+              <div class="border border-border-light rounded-lg overflow-hidden">
+                <div class="grid grid-cols-[1fr_8rem_3.5rem_1fr_2rem] gap-2 px-3 py-2 bg-surface-alt text-[11px] text-text-tertiary font-semibold uppercase tracking-wide border-b border-border-light">
+                  <span>Name</span>
+                  <span>Type</span>
+                  <span class="text-center">Req.</span>
+                  <span>Description</span>
+                  <span></span>
+                </div>
+                @for (param of forms.getQueryParamGroups(pathI); track paramI; let paramI = $index) {
+                  <div
+                    [formGroupName]="paramI"
+                    class="grid grid-cols-[1fr_8rem_3.5rem_1fr_2rem] gap-2 items-center px-3 py-2 border-b border-border-row last:border-b-0 hover:bg-surface-alt/50 transition-colors"
+                  >
+                    <input
+                      formControlName="name"
+                      type="text"
+                      placeholder="page"
+                      class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                    />
+                    <select
+                      formControlName="type"
+                      class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                    >
+                      @for (t of paramTypes; track t) {
+                        <option [value]="t">{{ t }}</option>
                       }
+                    </select>
+                    <div class="flex justify-center">
+                      <input type="checkbox" formControlName="required" class="w-4 h-4 accent-accent" />
                     </div>
                     <input
                       formControlName="description"
                       type="text"
-                      placeholder="OK"
-                      class="border border-gray-200 rounded px-2 py-1 text-xs w-full"
+                      placeholder="Description..."
+                      class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                     />
                     <button
                       type="button"
-                      (click)="forms.removeResponse(pathI, respI)"
-                      class="text-gray-400 hover:text-red-500 transition-colors text-base px-1"
-                    >
-                      ×
+                      (click)="forms.removeQueryParam(pathI, paramI)"
+                      class="flex items-center justify-center text-text-muted hover:text-danger transition-colors">
+                      <lucide-icon name="trash-2" [size]="14"></lucide-icon>
                     </button>
                   </div>
+                }
+              </div>
+            } @else {
+              <p class="text-xs text-text-muted italic">No query parameters.</p>
+            }
+          </div>
 
-                  <!-- Content entries -->
-                  <div class="px-3 py-2 flex flex-col gap-1" formArrayName="contents">
-                    @if (forms.getContentGroups(pathI, respI).length > 0) {
-                      <div class="grid grid-cols-[8rem_1fr_2rem] gap-2 text-xs text-gray-400 font-medium mb-1">
-                        <span>MIME type</span>
-                        <span>Schema</span>
-                        <span></span>
-                      </div>
-                      @for (content of forms.getContentGroups(pathI, respI); track contI; let contI = $index) {
-                        <div
-                          [formGroupName]="contI"
-                          class="grid grid-cols-[8rem_1fr_2rem] gap-2 items-center"
-                        >
-                          <select
-                            formControlName="mimeType"
-                            class="border border-gray-200 rounded px-2 py-1 text-xs w-full"
-                          >
-                            <option value="application/json">application/json</option>
-                            <option value="application/xml">application/xml</option>
-                            <option value="text/plain">text/plain</option>
-                            <option value="text/html">text/html</option>
-                          </select>
-                          @if (state.schemaNames().length > 0) {
-                            <select
-                              formControlName="schema"
-                              class="border border-gray-200 rounded px-2 py-1 text-xs w-full"
-                            >
-                              <option value="">— ninguno —</option>
-                              @for (schema of state.schemaNames(); track schema) {
-                                <option [value]="schema">{{ schema }}</option>
-                              }
-                            </select>
-                          } @else {
-                            <span class="text-xs text-gray-400 italic">Sin schemas</span>
-                          }
-                          <button
-                            type="button"
-                            (click)="forms.removeContent(pathI, respI, contI)"
-                            class="flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors text-base"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      }
+          <!-- REQUEST BODY -->
+          @if (!forms.isMethodWithoutBody(endpoint.get('method')?.value)) {
+          <div class="col-span-2 flex flex-col gap-3 border-t border-border-light pt-5" formArrayName="requestBody">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">Request Body</span>
+              <button
+                type="button"
+                (click)="forms.addRequestBodyContent(pathI)"
+                class="flex items-center gap-1 text-xs text-accent hover:text-accent-hover transition-colors font-medium">
+                <lucide-icon name="plus" [size]="14"></lucide-icon>
+                Add Content
+              </button>
+            </div>
+
+            @if (forms.getRequestBodyGroups(pathI).length > 0) {
+              <div class="border border-border-light rounded-lg overflow-hidden">
+                <div class="grid grid-cols-[10rem_1fr_2rem] gap-2 px-3 py-2 bg-surface-alt text-[11px] text-text-tertiary font-semibold uppercase tracking-wide border-b border-border-light">
+                  <span>MIME type</span>
+                  <span>Schema</span>
+                  <span></span>
+                </div>
+                @for (content of forms.getRequestBodyGroups(pathI); track contI; let contI = $index) {
+                  <div
+                    [formGroupName]="contI"
+                    class="grid grid-cols-[10rem_1fr_2rem] gap-2 items-center px-3 py-2 border-b border-border-row last:border-b-0 hover:bg-surface-alt/50 transition-colors"
+                  >
+                    <select
+                      formControlName="mimeType"
+                      class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                    >
+                      <option value="application/json">application/json</option>
+                      <option value="application/xml">application/xml</option>
+                      <option value="multipart/form-data">multipart/form-data</option>
+                      <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                      <option value="text/plain">text/plain</option>
+                    </select>
+                    @if (state.schemaNames().length > 0) {
+                      <select
+                        formControlName="schema"
+                        class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                      >
+                        <option value="">— none —</option>
+                        @for (schema of state.schemaNames(); track schema) {
+                          <option [value]="schema">{{ schema }}</option>
+                        }
+                      </select>
+                    } @else {
+                      <span class="text-xs text-text-muted italic">No schemas</span>
                     }
                     <button
                       type="button"
-                      (click)="forms.addContent(pathI, respI)"
-                      class="self-start text-xs text-indigo-500 hover:text-indigo-700 transition-colors mt-1"
-                    >
-                      + Añadir content
+                      (click)="forms.removeRequestBodyContent(pathI, contI)"
+                      class="flex items-center justify-center text-text-muted hover:text-danger transition-colors">
+                      <lucide-icon name="trash-2" [size]="14"></lucide-icon>
                     </button>
                   </div>
-                </div>
-              }
-            </div>
-          } @else {
-            <p class="text-xs text-gray-400 italic">Sin respuestas definidas.</p>
+                }
+              </div>
+            } @else {
+              <p class="text-xs text-text-muted italic">No content defined.</p>
+            }
+          </div>
           }
-        </div>
 
-        <div class="col-span-2 flex flex-col gap-1">
-          <label [for]="'description-' + pathI" class="text-sm font-medium">Descripción</label>
-          <textarea
-            [id]="'description-' + pathI"
-            formControlName="description"
-            placeholder="Descripción del endpoint..."
-            rows="3"
-            class="border border-gray-300 rounded px-3 py-2 text-sm resize-y"
-          ></textarea>
-        </div>
+          <!-- RESPONSES -->
+          <div class="col-span-2 flex flex-col gap-3 border-t border-border-light pt-5" formArrayName="responses">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">Responses</span>
+              <button
+                type="button"
+                (click)="forms.addResponse(pathI)"
+                class="flex items-center gap-1 text-xs text-accent hover:text-accent-hover transition-colors font-medium">
+                <lucide-icon name="plus" [size]="14"></lucide-icon>
+                Add Response
+              </button>
+            </div>
 
-      </form>
-    </app-panel>
+            @if (forms.getResponseGroups(pathI).length > 0) {
+              <div class="flex flex-col gap-3">
+                @for (response of forms.getResponseGroups(pathI); track respI; let respI = $index) {
+                  <div
+                    [formGroupName]="respI"
+                    class="border rounded-lg overflow-hidden"
+                    [class.border-danger-border-panel]="forms.isStatusCodeDuplicate(pathI, respI)"
+                    [class.border-border-light]="!forms.isStatusCodeDuplicate(pathI, respI)"
+                  >
+                    <div class="grid grid-cols-[5rem_1fr_auto] gap-2 items-center px-3 py-2 bg-surface-alt border-b border-border-light">
+                      <div class="flex flex-col gap-0.5">
+                        <input
+                          formControlName="statusCode"
+                          type="text"
+                          placeholder="200"
+                          class="border rounded-md px-2 py-1 text-xs w-full font-mono bg-surface-alt text-text-primary transition-colors"
+                          [class.border-danger-border]="forms.isStatusCodeDuplicate(pathI, respI)"
+                          [class.border-border-light]="!forms.isStatusCodeDuplicate(pathI, respI)"
+                        />
+                        @if (forms.isStatusCodeDuplicate(pathI, respI)) {
+                          <span class="text-[11px] text-danger">Duplicate code</span>
+                        }
+                      </div>
+                      <input
+                        formControlName="description"
+                        type="text"
+                        placeholder="OK"
+                        class="border border-border-light rounded-md px-2 py-1 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                      />
+                      <button
+                        type="button"
+                        (click)="forms.removeResponse(pathI, respI)"
+                        class="text-text-muted hover:text-danger transition-colors px-1">
+                        <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+                      </button>
+                    </div>
+
+                    <div class="px-3 py-2 flex flex-col gap-1" formArrayName="contents">
+                      @if (forms.getContentGroups(pathI, respI).length > 0) {
+                        <div class="grid grid-cols-[8rem_1fr_2rem] gap-2 text-[11px] text-text-muted font-semibold uppercase tracking-wide mb-1">
+                          <span>MIME type</span>
+                          <span>Schema</span>
+                          <span></span>
+                        </div>
+                        @for (content of forms.getContentGroups(pathI, respI); track contI; let contI = $index) {
+                          <div
+                            [formGroupName]="contI"
+                            class="grid grid-cols-[8rem_1fr_2rem] gap-2 items-center"
+                          >
+                            <select
+                              formControlName="mimeType"
+                              class="border border-border-light rounded-md px-2 py-1 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                            >
+                              <option value="application/json">application/json</option>
+                              <option value="application/xml">application/xml</option>
+                              <option value="text/plain">text/plain</option>
+                              <option value="text/html">text/html</option>
+                            </select>
+                            @if (state.schemaNames().length > 0) {
+                              <select
+                                formControlName="schema"
+                                class="border border-border-light rounded-md px-2 py-1 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                              >
+                                <option value="">— none —</option>
+                                @for (schema of state.schemaNames(); track schema) {
+                                  <option [value]="schema">{{ schema }}</option>
+                                }
+                              </select>
+                            } @else {
+                              <span class="text-xs text-text-muted italic">No schemas</span>
+                            }
+                            <button
+                              type="button"
+                              (click)="forms.removeContent(pathI, respI, contI)"
+                              class="flex items-center justify-center text-text-muted hover:text-danger transition-colors">
+                              <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+                            </button>
+                          </div>
+                        }
+                      }
+                      <button
+                        type="button"
+                        (click)="forms.addContent(pathI, respI)"
+                        class="self-start flex items-center gap-1 text-xs text-accent hover:text-accent-hover transition-colors mt-1 font-medium">
+                        <lucide-icon name="plus" [size]="14"></lucide-icon>
+                        Add Content
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="text-xs text-text-muted italic">No responses defined.</p>
+            }
+          </div>
+
+          <div class="col-span-2 flex flex-col gap-1.5">
+            <label [for]="'description-' + pathI" class="text-xs font-semibold text-text-secondary">Description</label>
+            <textarea
+              [id]="'description-' + pathI"
+              formControlName="description"
+              placeholder="Endpoint description..."
+              rows="3"
+              class="border border-border rounded-md px-3 py-2.5 text-sm resize-y bg-surface-alt text-text-primary transition-colors"
+            ></textarea>
+          </div>
+        </form>
+      </div>
+    </div>
   }
-
-  <div class="mt-2">
-    <app-button label="+ Añadir endpoint" type="button" (pressed)="forms.addPath()" />
-  </div>
 </app-main-layout>

@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { OpenApiFormsService } from './open-api-forms.service';
+import { TagFormValue, SchemeFormValue, SchemaFormValue } from '../models/forms.models';
 
 @Injectable({ providedIn: 'root' })
 export class OpenApiStateService {
@@ -8,13 +9,13 @@ export class OpenApiStateService {
   schemaNames = signal<string[]>([]);
 
   constructor(private forms: OpenApiFormsService) {
-    forms.tagsForm.valueChanges.subscribe((values: any[]) => {
+    forms.tagsForm.valueChanges.subscribe((values: TagFormValue[]) => {
       this.tagNames.set(values.map(t => t.name).filter(Boolean));
     });
-    forms.schemesForm.valueChanges.subscribe((values: any[]) => {
+    forms.schemesForm.valueChanges.subscribe((values: SchemeFormValue[]) => {
       this.schemeNames.set(values.map(s => s.schemeName).filter(Boolean));
     });
-    forms.schemasForm.valueChanges.subscribe((values: any[]) => {
+    forms.schemasForm.valueChanges.subscribe((values: SchemaFormValue[]) => {
       this.schemaNames.set(values.map(s => s.name).filter(Boolean));
     });
   }

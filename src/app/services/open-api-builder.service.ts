@@ -22,6 +22,7 @@ import {
   OpenApiComposedSchema,
   OpenApiNotSchema,
   OpenApiSecurityScheme,
+  OpenApiAdditionalProperties,
 } from '../models/open-api.models';
 import {
   ApiInfoFormValue,
@@ -277,16 +278,29 @@ export class OpenApiBuilderService {
       ...(schema.description && { description: schema.description }),
       ...(Object.keys(properties).length && { properties }),
       ...(required.length && { required }),
+      ...this.buildAdditionalProperties(schema),
     };
   }
 
   private buildPrimitiveSchema(schema: SchemaFormValue): OpenApiPrimitiveSchema {
-    return {
-      type: (schema.type || 'string') as OpenApiPrimitiveSchema['type'],
-      ...(schema.description && { description: schema.description }),
-      ...(schema.format && { format: schema.format }),
-      ...(schema.example && { example: schema.example }),
+    const type = (schema.type || 'string') as OpenApiPrimitiveSchema['type'];
+
+    const result: OpenApiPrimitiveSchema = {
+      type,
+      ...(schema.description?.trim() && { description: schema.description }),
+      ...(schema.format?.trim() && schema.format !== 'enum' && { format: schema.format }),
+      ...(schema.example?.trim() && { example: schema.example }),
     };
+
+    // Only add enum if format === 'enum' and enumValues parsed successfully
+    if (schema.format === 'enum' && schema.enumValues?.trim()) {
+      const enumArray = this.parseEnumValues(schema.enumValues, type);
+      if (enumArray?.length) {
+        result.enum = enumArray;
+      }
+    }
+
+    return result;
   }
 
   private buildArraySchema(schema: SchemaFormValue): OpenApiArraySchema {
@@ -334,16 +348,41 @@ export class OpenApiBuilderService {
       return { [type]: refs } satisfies OpenApiComposedSchema;
     }
     if (type.endsWith('[]')) {
+      // Array of primitives - enum goes on items
+      const baseType = type.slice(0, -2) as OpenApiPrimitiveSchema['type'];
+
+      const items: OpenApiSchemaObject = {
+        type: baseType,
+        ...(prop.format?.trim() && prop.format !== 'enum' && { format: prop.format }),
+      };
+
+      // Only add enum if format === 'enum' and enumValues parsed successfully
+      if (prop.format === 'enum' && prop.enumValues?.trim()) {
+        const enumArray = this.parseEnumValues(prop.enumValues, baseType);
+        if (enumArray?.length) {
+          items.enum = enumArray;
+        }
+      }
+
       return {
         type: 'array',
-        items: { type: type.slice(0, -2) as OpenApiPrimitiveSchema['type'] },
+        items,
       } satisfies OpenApiArraySchema;
     }
 
     const primitiveSchema: OpenApiPrimitiveSchema = {
       type: type as OpenApiPrimitiveSchema['type'],
+      ...(prop.format?.trim() && prop.format !== 'enum' && { format: prop.format }),
     };
-    if (prop.format) primitiveSchema.format = prop.format;
+
+    // Only add enum if format === 'enum' and enumValues parsed successfully
+    if (prop.format === 'enum' && prop.enumValues?.trim()) {
+      const enumArray = this.parseEnumValues(prop.enumValues, type);
+      if (enumArray?.length) {
+        primitiveSchema.enum = enumArray;
+      }
+    }
+
     return primitiveSchema;
   }
 
@@ -400,5 +439,99 @@ export class OpenApiBuilderService {
     }
 
     return schemes;
+  }
+
+  // ── Enum Values Parser ────────────────────────────────────────────────────
+  /**
+   * Parse comma-separated enum values with strict type validation.
+   * OpenAPI Spec: https://spec.openapis.org/oas/v3.0.3#schema-object
+   * Values must match the declared type exactly.
+   */
+  private parseEnumValues(
+    enumString: string,
+    type: string
+  ): string[] | number[] | boolean[] | undefined {
+    if (!enumString?.trim()) return undefined;
+
+    const rawValues = enumString
+      .split(',')
+      .map((v: string) => v.trim())
+      .filter((v: string) => v.length > 0);
+
+    if (rawValues.length === 0) return undefined;
+
+    try {
+      if (type === 'integer') {
+        // Strictly validate integers - reject decimals and invalid formats
+        return rawValues.map((v: string) => {
+          if (!/^-?\d+$/.test(v)) {
+            throw new Error(`Invalid integer: "${v}"`);
+          }
+          return parseInt(v, 10);
+        });
+      }
+
+      if (type === 'number') {
+        // Validate numeric format - allow decimals but reject invalid formats
+        return rawValues.map((v: string) => {
+          const num = parseFloat(v);
+          if (isNaN(num)) {
+            throw new Error(`Invalid number: "${v}"`);
+          }
+          return num;
+        });
+      }
+
+      if (type === 'boolean') {
+        // Strict boolean validation - only accept 4 valid values
+        return rawValues.map((v: string) => {
+          const lower = v.toLowerCase();
+          if (!['true', 'false', '1', '0'].includes(lower)) {
+            throw new Error(`Invalid boolean: "${v}"`);
+          }
+          return lower === 'true' || lower === '1';
+        });
+      }
+
+      // String type - validate safe characters (no control chars, quotes, backslashes)
+      rawValues.forEach((v: string) => {
+        if (/[\x00-\x1F\\"'`]/.test(v)) {
+          throw new Error(`String contains unsafe characters: "${v}"`);
+        }
+      });
+
+      // Remove duplicates while preserving order
+      return Array.from(new Set(rawValues));
+    } catch (error) {
+      console.warn(
+        `Enum parsing error for type "${type}":`,
+        error instanceof Error ? error.message : String(error)
+      );
+      return undefined; // Don't include invalid enums
+    }
+  }
+
+  // ── Additional Properties ──────────────────────────────────────────────
+
+  private buildAdditionalProperties(
+    schema: SchemaFormValue
+  ): { additionalProperties: OpenApiAdditionalProperties } | Record<string, never> {
+    if (!schema.additionalPropsEnabled) return {};
+
+    // Build as a property-like schema using the same logic as buildPropertySchema
+    const type = schema.additionalPropsType || 'string';
+
+    const propertyLike: PropertyFormValue = {
+      name: '', // Not used in additionalProperties context
+      type,
+      format: schema.additionalPropsFormat || '',
+      refSchema: schema.additionalPropsRef || '',
+      composedSchemas: schema.additionalPropsComposed || [],
+      required: false, // Not used in additionalProperties context
+      enumValues: schema.additionalPropsEnum || '',
+    };
+
+    const builtSchema = this.buildPropertySchema(propertyLike);
+    return { additionalProperties: builtSchema };
   }
 }

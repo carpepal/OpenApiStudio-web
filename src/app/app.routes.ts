@@ -8,6 +8,11 @@ import { PathsComponent } from './pages/paths/paths.component';
 
 export const routes: Routes = [
   {
+    path: '',
+    redirectTo: 'api-info',
+    pathMatch: 'full',
+  },
+  {
     path: 'api-info',
     component: ApiInfoComponent,
   },
@@ -30,5 +35,9 @@ export const routes: Routes = [
   {
     path: 'paths',
     component: PathsComponent,
+  },
+  {
+    path: '**',
+    redirectTo: 'api-info',
   },
 ];

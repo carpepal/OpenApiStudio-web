@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 @Injectable({ providedIn: 'root' })
 export class OpenApiFormsService {
@@ -61,6 +61,7 @@ export class OpenApiFormsService {
     return this.fb.group({
       name: [''], type: ['string'], format: [''],
       refSchema: [''], composedSchemas: [[]], required: [false],
+      enumValues: ['', [this.createEnumValidator()]],
     });
   }
 
@@ -68,7 +69,14 @@ export class OpenApiFormsService {
     return this.fb.group({
       name: [''], kind: ['object'], description: [''],
       type: ['string'], format: [''], example: [''],
+      enumValues: ['', [this.createEnumValidator()]],
       properties: this.fb.array([]),
+      additionalPropsEnabled: [false],
+      additionalPropsType: ['string'],
+      additionalPropsFormat: [''],
+      additionalPropsRef: [''],
+      additionalPropsComposed: [[]],
+      additionalPropsEnum: ['', [this.createEnumValidator()]],
       itemsKind: ['$ref'], itemsType: ['string'], itemsRef: [''],
       refSchema: [''], composedSchemas: [[]],
     });
@@ -201,5 +209,35 @@ export class OpenApiFormsService {
   }
   removeContent(pathIndex: number, respIndex: number, contentIndex: number) {
     this.getContents(pathIndex, respIndex).removeAt(contentIndex);
+  }
+
+  // ── Enum Validator ────────────────────────────────────────────────────────
+  /**
+   * Validator for enum values field.
+   * Checks for unsafe characters and basic format validation.
+   */
+  private createEnumValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const value = control.value?.trim() as string | undefined;
+      if (!value) return null; // Valid if empty
+
+      const values = value.split(',').map((v: string) => v.trim()).filter((v: string) => v);
+
+      // Check for unsafe characters in any value
+      for (let i = 0; i < values.length; i++) {
+        const v = values[i];
+        if (/[\x00-\x1F\\"'`]/.test(v)) {
+          return {
+            enumInvalidChar: {
+              value: v,
+              position: i,
+              message: `Value "${v}" contains unsafe characters`
+            }
+          };
+        }
+      }
+
+      return null;
+    };
   }
 }
