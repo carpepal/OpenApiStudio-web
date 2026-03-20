@@ -15,6 +15,10 @@ import { PropertyFormValue } from '../models/forms.models';
 
 @Injectable({ providedIn: 'root' })
 export class OpenApiImportService {
+  private static readonly VALID_METHODS = new Set([
+    'get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace',
+  ]);
+
   constructor(private readonly forms: OpenApiFormsService) {}
 
   // ── Public API ──────────────────────────────────────────────────────────────
@@ -75,16 +79,80 @@ export class OpenApiImportService {
   /**
    * Mutates spec in-place: extracts inline object schemas from properties into
    * top-level schemas with dot-notation names (e.g. User.address.city).
+   * Also extracts inline schemas from path requestBody and responses.
    * Must be called before populateSchemas so all schemas are already refs.
    */
   private flattenInlineSchemas(spec: OpenApiSpec): void {
-    if (!spec.components?.schemas) return;
+    if (!spec.components) spec.components = {};
+    if (!spec.components.schemas) spec.components.schemas = {};
 
+    const schemas = spec.components.schemas;
+
+    // Process component schemas
     const extraSchemas: Record<string, OpenApiSchemaObject> = {};
-    for (const [name, schema] of Object.entries(spec.components.schemas)) {
+    for (const [name, schema] of Object.entries(schemas)) {
       this.extractInlineObjects(name, schema, extraSchemas);
     }
-    Object.assign(spec.components.schemas, extraSchemas);
+    Object.assign(schemas, extraSchemas);
+
+    // Extract inline schemas from path operations into components.schemas
+    for (const [pathStr, pathItem] of Object.entries(spec.paths ?? {})) {
+      for (const [method, rawOp] of Object.entries(pathItem)) {
+        if (!OpenApiImportService.VALID_METHODS.has(method)) continue;
+        const op = rawOp as OpenApiOperation;
+
+        // requestBody inline schemas
+        for (const [mimeType, entry] of Object.entries(op.requestBody?.content ?? {})) {
+          if (entry.schema && !('$ref' in entry.schema)) {
+            const name = this.generatePathSchemaName(pathStr, method, 'Request', null, mimeType);
+            schemas[name] = entry.schema;
+            entry.schema = { $ref: `#/components/schemas/${name}` };
+            const nested: Record<string, OpenApiSchemaObject> = {};
+            this.extractInlineObjects(name, schemas[name], nested);
+            Object.assign(schemas, nested);
+          }
+        }
+
+        // response inline schemas
+        for (const [statusCode, resp] of Object.entries(op.responses ?? {})) {
+          for (const [mimeType, entry] of Object.entries(resp.content ?? {})) {
+            if (entry.schema && !('$ref' in entry.schema)) {
+              const name = this.generatePathSchemaName(pathStr, method, 'Response', statusCode, mimeType);
+              schemas[name] = entry.schema;
+              entry.schema = { $ref: `#/components/schemas/${name}` };
+              const nested: Record<string, OpenApiSchemaObject> = {};
+              this.extractInlineObjects(name, schemas[name], nested);
+              Object.assign(schemas, nested);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Generates a PascalCase schema name from path + method + context.
+   * e.g. POST /users/{id} → PostUsersIdRequestBody
+   */
+  private generatePathSchemaName(
+    path: string,
+    method: string,
+    suffix: string,
+    statusCode: string | null,
+    mimeType: string,
+  ): string {
+    const pathPart = path
+      .split('/')
+      .filter(Boolean)
+      .map(s => s.replace(/[{}]/g, '').replace(/[^a-zA-Z0-9]/g, '_'))
+      .map(s => s.charAt(0).toUpperCase() + s.slice(1))
+      .join('');
+    const methodPart = method.charAt(0).toUpperCase() + method.slice(1).toLowerCase();
+    const statusPart = statusCode ?? '';
+    const mimePart = mimeType.split('/')[1]?.replace(/[^a-zA-Z0-9]/g, '') ?? '';
+    const parts = [methodPart, pathPart, suffix, statusPart, mimePart !== 'json' ? mimePart : '']
+      .filter(Boolean);
+    return parts.join('');
   }
 
   /**
@@ -232,18 +300,19 @@ export class OpenApiImportService {
     }
     if ('type' in schema) {
       if (schema.type === 'object') {
+        const requiredSet = new Set(schema.required ?? []);
         const properties = Object.entries(schema.properties ?? {}).map(
-          ([propName, propSchema]) => this.mapProperty(propName, propSchema),
+          ([propName, propSchema]) => this.mapProperty(propName, propSchema, requiredSet.has(propName)),
         );
         const addlProps = this.mapAdditionalProperties(schema.additionalProperties);
         return { ...base, kind: 'object', properties, ...addlProps };
       }
       if (schema.type === 'array') {
         const items = schema.items;
-        if ('$ref' in items) {
+        if (items && '$ref' in items) {
           return { ...base, kind: 'array', itemsKind: '$ref', itemsRef: this.extractSchemaName(items.$ref) };
         }
-        if ('type' in items) {
+        if (items && 'type' in items) {
           return { ...base, kind: 'array', itemsKind: 'primitive', itemsType: items.type };
         }
         return { ...base, kind: 'array' };
@@ -267,14 +336,14 @@ export class OpenApiImportService {
     return { ...base, kind: 'primitive' };
   }
 
-  private mapProperty(propName: string, schema: OpenApiSchemaObject): PropertyFormValue {
+  private mapProperty(propName: string, schema: OpenApiSchemaObject, required = false): PropertyFormValue {
     const base: PropertyFormValue = {
       name: propName,
       type: 'string',
       format: '',
       refSchema: '',
       composedSchemas: [],
-      required: false,
+      required,
       enumValues: '',
     };
 
@@ -391,11 +460,55 @@ export class OpenApiImportService {
 
   // ── Paths ───────────────────────────────────────────────────────────────────
 
+  /**
+   * Resolves a parameter that may be a direct object or a $ref to components/parameters.
+   * Returns null if the ref cannot be resolved.
+   */
+  private resolveParameter(
+    param: OpenApiParameter | { $ref: string },
+    spec: OpenApiSpec,
+  ): OpenApiParameter | null {
+    if (!('$ref' in param)) return param;
+    const name = (param as { $ref: string }).$ref.replace('#/components/parameters/', '');
+    const componentParams = (spec.components as Record<string, unknown> | undefined)?.['parameters'];
+    if (componentParams && typeof componentParams === 'object') {
+      return (componentParams as Record<string, OpenApiParameter>)[name] ?? null;
+    }
+    return null;
+  }
+
   private populatePaths(spec: OpenApiSpec): void {
     const endpoints: Array<{ path: string; method: string; operation: OpenApiOperation }> = [];
     for (const [pathStr, pathItem] of Object.entries(spec.paths ?? {})) {
-      for (const [method, operation] of Object.entries(pathItem)) {
-        endpoints.push({ path: pathStr, method, operation: operation as OpenApiOperation });
+      // Path-level parameters: resolve any $ref entries against components/parameters.
+      const rawPathLevelParams =
+        ((pathItem as Record<string, unknown>)['parameters'] as Array<OpenApiParameter | { $ref: string }> | undefined) ?? [];
+      const pathLevelParams: OpenApiParameter[] = rawPathLevelParams
+        .map(p => this.resolveParameter(p, spec))
+        .filter((p): p is OpenApiParameter => p !== null);
+
+      for (const [method, rawOp] of Object.entries(pathItem)) {
+        // Skip non-method fields: parameters, summary, description, servers, externalDocs
+        if (!OpenApiImportService.VALID_METHODS.has(method)) continue;
+
+        const operation = rawOp as OpenApiOperation;
+
+        // Operation-level parameters: also resolve $ref entries.
+        const rawOpParams = (operation.parameters ?? []) as Array<OpenApiParameter | { $ref: string }>;
+        const opParams: OpenApiParameter[] = rawOpParams
+          .map(p => this.resolveParameter(p, spec))
+          .filter((p): p is OpenApiParameter => p !== null);
+
+        // Merge path-level and operation-level params.
+        // Operation-level params override path-level ones with the same name+in.
+        const mergedParams: OpenApiParameter[] = [
+          ...pathLevelParams.filter(
+            pp => !opParams.some(op => op.name === pp.name && op.in === pp.in),
+          ),
+          ...opParams,
+        ];
+
+        endpoints.push({ path: pathStr, method, operation: { ...operation, parameters: mergedParams } });
       }
     }
 
@@ -417,7 +530,7 @@ export class OpenApiImportService {
         const requestBody = Object.entries(operation.requestBody?.content ?? {}).map(
           ([mimeType, entry]) => ({
             mimeType,
-            schema: '$ref' in entry.schema ? this.extractSchemaName((entry.schema as { $ref: string }).$ref) : '',
+            schema: entry.schema && '$ref' in entry.schema ? this.extractSchemaName((entry.schema as { $ref: string }).$ref) : '',
           }),
         );
 
@@ -426,7 +539,7 @@ export class OpenApiImportService {
           description: resp.description ?? '',
           contents: Object.entries(resp.content ?? {}).map(([mimeType, entry]) => ({
             mimeType,
-            schema: '$ref' in entry.schema ? this.extractSchemaName((entry.schema as { $ref: string }).$ref) : '',
+            schema: entry.schema && '$ref' in entry.schema ? this.extractSchemaName((entry.schema as { $ref: string }).$ref) : '',
           })),
         }));
 
