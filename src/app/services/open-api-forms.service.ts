@@ -72,7 +72,7 @@ export class OpenApiFormsService {
       minimum: [''], maximum: [''], exclusiveMinimum: [false], exclusiveMaximum: [false], multipleOf: [''],
       minLength: [''], maxLength: [''], pattern: [''],
       minItems: [''], maxItems: [''], uniqueItems: [false],
-      nullable: [false], readOnly: [false], writeOnly: [false], deprecated: [false],
+      deprecated: [false],
     });
   }
 
@@ -94,7 +94,7 @@ export class OpenApiFormsService {
       minimum: [''], maximum: [''], exclusiveMinimum: [false], exclusiveMaximum: [false], multipleOf: [''],
       minLength: [''], maxLength: [''], pattern: [''],
       minItems: [''], maxItems: [''], uniqueItems: [false],
-      nullable: [false], readOnly: [false], writeOnly: [false], deprecated: [false],
+      deprecated: [false],
     });
   }
   get schemaGroups(): FormGroup[] { return this.schemasForm.controls as FormGroup[]; }

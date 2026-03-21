@@ -68,9 +68,6 @@ export interface PropertyFormValue {
   maxItems: string;
   uniqueItems: boolean;
   // Flags
-  nullable: boolean;
-  readOnly: boolean;
-  writeOnly: boolean;
   deprecated: boolean;
 }
 
@@ -116,9 +113,6 @@ export interface SchemaFormValue {
   maxItems: string;
   uniqueItems: boolean;
   // Flags (all kinds)
-  nullable: boolean;
-  readOnly: boolean;
-  writeOnly: boolean;
   deprecated: boolean;
 }
 

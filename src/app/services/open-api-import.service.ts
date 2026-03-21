@@ -292,7 +292,7 @@ export class OpenApiImportService {
       minimum: '', maximum: '', exclusiveMinimum: false, exclusiveMaximum: false, multipleOf: '',
       minLength: '', maxLength: '', pattern: '',
       minItems: '', maxItems: '', uniqueItems: false,
-      nullable: false, readOnly: false, writeOnly: false, deprecated: false,
+      deprecated: false,
     };
 
     if ('$ref' in schema) {
@@ -321,9 +321,6 @@ export class OpenApiImportService {
         const addlProps = this.mapAdditionalProperties(objSchema.additionalProperties);
         return {
           ...base, kind: 'object', properties, ...addlProps,
-          nullable: objSchema.nullable ?? false,
-          readOnly: objSchema.readOnly ?? false,
-          writeOnly: objSchema.writeOnly ?? false,
           deprecated: objSchema.deprecated ?? false,
         };
       }
@@ -333,9 +330,6 @@ export class OpenApiImportService {
           minItems: arrSchema.minItems !== undefined ? String(arrSchema.minItems) : '',
           maxItems: arrSchema.maxItems !== undefined ? String(arrSchema.maxItems) : '',
           uniqueItems: arrSchema.uniqueItems ?? false,
-          nullable: arrSchema.nullable ?? false,
-          readOnly: arrSchema.readOnly ?? false,
-          writeOnly: arrSchema.writeOnly ?? false,
           deprecated: arrSchema.deprecated ?? false,
         };
         const items = arrSchema.items;
@@ -364,9 +358,6 @@ export class OpenApiImportService {
         minLength: primitive.minLength !== undefined ? String(primitive.minLength) : '',
         maxLength: primitive.maxLength !== undefined ? String(primitive.maxLength) : '',
         pattern: primitive.pattern ?? '',
-        nullable: primitive.nullable ?? false,
-        readOnly: primitive.readOnly ?? false,
-        writeOnly: primitive.writeOnly ?? false,
         deprecated: primitive.deprecated ?? false,
       };
       if (primitive.enum?.length) {
@@ -392,7 +383,7 @@ export class OpenApiImportService {
       minimum: '', maximum: '', exclusiveMinimum: false, exclusiveMaximum: false, multipleOf: '',
       minLength: '', maxLength: '', pattern: '',
       minItems: '', maxItems: '', uniqueItems: false,
-      nullable: false, readOnly: false, writeOnly: false, deprecated: false,
+      deprecated: false,
     };
 
     if ('$ref' in schema) {
@@ -418,9 +409,6 @@ export class OpenApiImportService {
           minItems: arrSchema.minItems !== undefined ? String(arrSchema.minItems) : '',
           maxItems: arrSchema.maxItems !== undefined ? String(arrSchema.maxItems) : '',
           uniqueItems: arrSchema.uniqueItems ?? false,
-          nullable: arrSchema.nullable ?? false,
-          readOnly: arrSchema.readOnly ?? false,
-          writeOnly: arrSchema.writeOnly ?? false,
           deprecated: arrSchema.deprecated ?? false,
         };
         const items = arrSchema.items;
@@ -453,9 +441,6 @@ export class OpenApiImportService {
         minLength: primitive.minLength !== undefined ? String(primitive.minLength) : '',
         maxLength: primitive.maxLength !== undefined ? String(primitive.maxLength) : '',
         pattern: primitive.pattern ?? '',
-        nullable: primitive.nullable ?? false,
-        readOnly: primitive.readOnly ?? false,
-        writeOnly: primitive.writeOnly ?? false,
         deprecated: primitive.deprecated ?? false,
       };
       if (primitive.enum?.length) {

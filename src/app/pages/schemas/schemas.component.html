@@ -5,32 +5,43 @@
       <lucide-icon name="braces" [size]="24" class="text-accent"></lucide-icon>
       <div>
         <h2 class="text-xl font-semibold text-text-primary">Schemas</h2>
-        <p class="text-sm text-text-secondary">Define reusable data models for your API</p>
+        <p class="text-sm text-text-secondary">
+          Define reusable data models for your API
+        </p>
       </div>
     </div>
     <button
       (click)="addSchema()"
-      class="flex items-center gap-2 bg-accent text-text-on-dark text-sm font-semibold rounded-md px-5 py-2.5 hover:bg-accent-hover transition-colors">
+      class="flex items-center gap-2 bg-accent text-text-on-dark text-sm font-semibold rounded-md px-5 py-2.5 hover:bg-accent-hover transition-colors"
+    >
       <lucide-icon name="plus" [size]="16"></lucide-icon>
       Add Schema
     </button>
   </div>
 
   @for (schema of forms.schemaGroups; track schI; let schI = $index) {
-    <div [attr.id]="'item-schema-' + schI" class="mb-4 rounded-xl bg-surface-muted border border-border-light overflow-hidden transition-colors">
+    <div
+      [attr.id]="'item-schema-' + schI"
+      class="mb-4 rounded-xl bg-surface-muted border border-border-light overflow-hidden transition-colors"
+    >
       <!-- Panel Header -->
       <div class="flex items-center gap-3 px-5 py-3.5 bg-surface-alt">
-        <span class="px-2.5 py-1 text-[11px] font-semibold rounded uppercase tracking-wide {{ getBadgeClass(getKind(schI)) }}">
+        <span
+          class="px-2.5 py-1 text-[11px] font-semibold rounded uppercase tracking-wide {{
+            getBadgeClass(getKind(schI))
+          }}"
+        >
           {{ kindLabels[getKind(schI)] }}
         </span>
         <span class="font-mono text-sm font-semibold text-text-primary">
-          {{ schema.get('name')?.value || 'Unnamed' }}
+          {{ schema.get("name")?.value || "Unnamed" }}
         </span>
         <div class="flex-1"></div>
         @if (forms.schemasForm.length > 1) {
           <button
             (click)="forms.removeSchema(schI)"
-            class="text-text-muted hover:text-danger transition-colors">
+            class="text-text-muted hover:text-danger transition-colors"
+          >
             <lucide-icon name="trash-2" [size]="16"></lucide-icon>
           </button>
         }
@@ -41,7 +52,11 @@
         <form [formGroup]="schema" class="grid grid-cols-2 gap-5">
           <!-- Name | Kind -->
           <div class="flex flex-col gap-1.5">
-            <label [for]="'name-' + schI" class="text-xs font-semibold text-text-secondary">Schema Name</label>
+            <label
+              [for]="'name-' + schI"
+              class="text-xs font-semibold text-text-secondary"
+              >Schema Name</label
+            >
             <input
               [id]="'name-' + schI"
               type="text"
@@ -52,7 +67,11 @@
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label [for]="'kind-' + schI" class="text-xs font-semibold text-text-secondary">Definition type</label>
+            <label
+              [for]="'kind-' + schI"
+              class="text-xs font-semibold text-text-secondary"
+              >Definition type</label
+            >
             <select
               [id]="'kind-' + schI"
               formControlName="kind"
@@ -65,9 +84,13 @@
           </div>
 
           <!-- Title (visible for all kinds except $ref and not) -->
-          @if (getKind(schI) !== '$ref' && getKind(schI) !== 'not') {
+          @if (getKind(schI) !== "$ref" && getKind(schI) !== "not") {
             <div class="col-span-2 flex flex-col gap-1.5">
-              <label [for]="'title-' + schI" class="text-xs font-semibold text-text-secondary">Title</label>
+              <label
+                [for]="'title-' + schI"
+                class="text-xs font-semibold text-text-secondary"
+                >Title</label
+              >
               <input
                 [id]="'title-' + schI"
                 type="text"
@@ -79,9 +102,13 @@
           }
 
           <!-- PRIMITIVE -->
-          @if (getKind(schI) === 'primitive') {
+          @if (getKind(schI) === "primitive") {
             <div class="flex flex-col gap-1.5">
-              <label [for]="'type-' + schI" class="text-xs font-semibold text-text-secondary">Type</label>
+              <label
+                [for]="'type-' + schI"
+                class="text-xs font-semibold text-text-secondary"
+                >Type</label
+              >
               <select
                 [id]="'type-' + schI"
                 formControlName="type"
@@ -95,21 +122,32 @@
 
             @if (getFormatsForType(getPrimitiveType(schI)).length > 0) {
               <div class="flex flex-col gap-1.5">
-                <label [for]="'format-' + schI" class="text-xs font-semibold text-text-secondary">Format</label>
+                <label
+                  [for]="'format-' + schI"
+                  class="text-xs font-semibold text-text-secondary"
+                  >Format</label
+                >
                 <select
                   [id]="'format-' + schI"
                   formControlName="format"
                   class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
                 >
-                  @for (f of getFormatsForType(getPrimitiveType(schI)); track f) {
-                    <option [value]="f">{{ f || '— none —' }}</option>
+                  @for (
+                    f of getFormatsForType(getPrimitiveType(schI));
+                    track f
+                  ) {
+                    <option [value]="f">{{ f || "— none —" }}</option>
                   }
                 </select>
               </div>
             }
 
             <div class="flex flex-col gap-1.5">
-              <label [for]="'example-' + schI" class="text-xs font-semibold text-text-secondary">Example</label>
+              <label
+                [for]="'example-' + schI"
+                class="text-xs font-semibold text-text-secondary"
+                >Example</label
+              >
               <input
                 [id]="'example-' + schI"
                 type="text"
@@ -120,7 +158,11 @@
             </div>
 
             <div class="flex flex-col gap-1.5">
-              <label [for]="'default-' + schI" class="text-xs font-semibold text-text-secondary">Default</label>
+              <label
+                [for]="'default-' + schI"
+                class="text-xs font-semibold text-text-secondary"
+                >Default</label
+              >
               <input
                 [id]="'default-' + schI"
                 type="text"
@@ -130,9 +172,12 @@
               />
             </div>
 
-            @if (isEnumFormat(schema.get('format')?.value)) {
+            @if (isEnumFormat(schema.get("format")?.value)) {
               <div class="col-span-2 flex flex-col gap-1.5">
-                <label [for]="'enum-' + schI" class="text-xs font-semibold text-text-primary">
+                <label
+                  [for]="'enum-' + schI"
+                  class="text-xs font-semibold text-text-primary"
+                >
                   Enum Values
                 </label>
                 <textarea
@@ -141,15 +186,20 @@
                   placeholder="value1, value2, value3"
                   rows="3"
                   class="w-full px-2 py-1 border border-border-light rounded text-sm font-mono resize-none bg-surface-alt text-text-primary transition-colors"
-                  aria-label="Enum values, comma-separated">
+                  aria-label="Enum values, comma-separated"
+                >
                 </textarea>
                 <p class="text-[11px] text-text-muted">
                   Comma-separated values (e.g., red, blue, green)
                 </p>
 
-                @if (schema.get('enumValues')?.hasError('enumInvalidChar')) {
+                @if (schema.get("enumValues")?.hasError("enumInvalidChar")) {
                   <p class="text-[11px] text-danger mt-1">
-                    ⚠️ {{ schema.get('enumValues')?.getError('enumInvalidChar').message }}
+                    ⚠️
+                    {{
+                      schema.get("enumValues")?.getError("enumInvalidChar")
+                        .message
+                    }}
                   </p>
                 }
               </div>
@@ -157,88 +207,153 @@
 
             @if (isNumericType(getPrimitiveType(schI))) {
               <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-text-secondary">Minimum</label>
-                <input formControlName="minimum" type="text" placeholder="0"
-                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+                <label class="text-xs font-semibold text-text-secondary"
+                  >Minimum</label
+                >
+                <input
+                  formControlName="minimum"
+                  type="text"
+                  placeholder="0"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+                />
               </div>
               <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-text-secondary">Maximum</label>
-                <input formControlName="maximum" type="text" placeholder="100"
-                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+                <label class="text-xs font-semibold text-text-secondary"
+                  >Maximum</label
+                >
+                <input
+                  formControlName="maximum"
+                  type="text"
+                  placeholder="100"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+                />
               </div>
               <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-text-secondary">Multiple Of</label>
-                <input formControlName="multipleOf" type="text" placeholder="5"
-                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+                <label class="text-xs font-semibold text-text-secondary"
+                  >Multiple Of</label
+                >
+                <input
+                  formControlName="multipleOf"
+                  type="text"
+                  placeholder="5"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+                />
               </div>
               <div class="flex items-center gap-2 self-end pb-2.5">
-                <input type="checkbox" formControlName="exclusiveMinimum" class="w-4 h-4 accent-accent" />
+                <input
+                  type="checkbox"
+                  formControlName="exclusiveMinimum"
+                  class="w-4 h-4 accent-accent"
+                />
                 <label class="text-xs text-text-secondary">Excl. min</label>
               </div>
               <div class="flex items-center gap-2 self-end pb-2.5">
-                <input type="checkbox" formControlName="exclusiveMaximum" class="w-4 h-4 accent-accent" />
+                <input
+                  type="checkbox"
+                  formControlName="exclusiveMaximum"
+                  class="w-4 h-4 accent-accent"
+                />
                 <label class="text-xs text-text-secondary">Excl. max</label>
               </div>
             }
 
             @if (isStringType(getPrimitiveType(schI))) {
               <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-text-secondary">Min Length</label>
-                <input formControlName="minLength" type="text" placeholder="0"
-                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+                <label class="text-xs font-semibold text-text-secondary"
+                  >Min Length</label
+                >
+                <input
+                  formControlName="minLength"
+                  type="text"
+                  placeholder="0"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+                />
               </div>
               <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-text-secondary">Max Length</label>
-                <input formControlName="maxLength" type="text" placeholder="255"
-                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+                <label class="text-xs font-semibold text-text-secondary"
+                  >Max Length</label
+                >
+                <input
+                  formControlName="maxLength"
+                  type="text"
+                  placeholder="255"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+                />
               </div>
               <div class="col-span-2 flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-text-secondary">Pattern</label>
-                <input formControlName="pattern" type="text" placeholder="^[a-z]+$"
-                  class="border border-border rounded-md px-3 py-2.5 text-sm font-mono bg-surface-alt text-text-primary h-10 transition-colors" />
+                <label class="text-xs font-semibold text-text-secondary"
+                  >Pattern</label
+                >
+                <input
+                  formControlName="pattern"
+                  type="text"
+                  placeholder="^[a-z]+$"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm font-mono bg-surface-alt text-text-primary h-10 transition-colors"
+                />
               </div>
             }
           }
 
           <!-- OBJECT: properties table -->
-          @if (getKind(schI) === 'object') {
+          @if (getKind(schI) === "object") {
             <div class="col-span-2 flex flex-col gap-3">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">Properties</span>
+                <span
+                  class="text-xs font-semibold text-text-secondary uppercase tracking-wide"
+                  >Properties</span
+                >
                 <button
                   type="button"
                   (click)="addProperty(schI)"
-                  class="flex items-center gap-1 text-xs text-accent hover:text-accent-hover transition-colors font-medium">
+                  class="flex items-center gap-1 text-xs text-accent hover:text-accent-hover transition-colors font-medium"
+                >
                   <lucide-icon name="plus" [size]="14"></lucide-icon>
                   Add Property
                 </button>
               </div>
 
               @if (forms.getPropertyGroups(schI).length > 0) {
-                <div class="border border-border-light rounded-lg overflow-hidden" formArrayName="properties">
-                  <div class="grid gap-2 px-3 py-2 bg-surface-alt text-[11px] text-text-tertiary font-semibold uppercase tracking-wide border-b border-border-light"
-                       [style.grid-template-columns]="hasAnyEnumFormat(schI) ? '1fr 10rem 1fr 1fr 1.75rem 1.75rem 1.75rem 1.75rem 3.5rem 1.75rem 1.75rem' : '1fr 10rem 1fr 1.75rem 1.75rem 1.75rem 1.75rem 3.5rem 1.75rem 1.75rem'">
+                <div
+                  class="border border-border-light rounded-lg overflow-hidden"
+                  formArrayName="properties"
+                >
+                  <div
+                    class="grid gap-2 px-3 py-2 bg-surface-alt text-[11px] text-text-tertiary font-semibold uppercase tracking-wide border-b border-border-light"
+                    [style.grid-template-columns]="
+                      hasAnyEnumFormat(schI)
+                        ? '1fr 10rem 1fr 1fr 1.75rem 3.5rem 1.75rem 1.75rem'
+                        : '1fr 10rem 1fr 1.75rem 3.5rem 1.75rem 1.75rem'
+                    "
+                  >
                     <span>Name</span>
                     <span>Type</span>
                     <span>Format / Ref</span>
                     @if (hasAnyEnumFormat(schI)) {
                       <span>Enum</span>
                     }
-                    <span class="text-center" title="Nullable">N</span>
-                    <span class="text-center" title="Read Only">RO</span>
-                    <span class="text-center" title="Write Only">WO</span>
                     <span class="text-center" title="Deprecated">Dep</span>
                     <span class="text-center">Req.</span>
                     <span></span>
                     <span></span>
                   </div>
 
-                  @for (prop of forms.getPropertyGroups(schI); track propI; let propI = $index) {
-                    <div [formGroupName]="propI" class="border-b border-border-row last:border-b-0">
+                  @for (
+                    prop of forms.getPropertyGroups(schI);
+                    track propI;
+                    let propI = $index
+                  ) {
+                    <div
+                      [formGroupName]="propI"
+                      class="border-b border-border-row last:border-b-0"
+                    >
                       <!-- Main property row -->
                       <div
                         class="grid gap-2 items-start px-3 py-2 hover:bg-surface-alt/50 transition-colors"
-                        [style.grid-template-columns]="hasAnyEnumFormat(schI) ? '1fr 10rem 1fr 1fr 1.75rem 1.75rem 1.75rem 1.75rem 3.5rem 1.75rem 1.75rem' : '1fr 10rem 1fr 1.75rem 1.75rem 1.75rem 1.75rem 3.5rem 1.75rem 1.75rem'"
+                        [style.grid-template-columns]="
+                          hasAnyEnumFormat(schI)
+                            ? '1fr 10rem 1fr 1fr 1.75rem 3.5rem 1.75rem 1.75rem'
+                            : '1fr 10rem 1fr 1.75rem 3.5rem 1.75rem 1.75rem'
+                        "
                       >
                         <input
                           formControlName="name"
@@ -264,12 +379,17 @@
                               class="border border-border-light rounded-md px-2 py-1 text-xs w-full h-16 bg-surface-alt text-text-primary transition-colors"
                               title="Ctrl+click for multiple"
                             >
-                              @for (s of state.getSchemaNamesExcluding(schI); track s) {
+                              @for (
+                                s of state.getSchemaNamesExcluding(schI);
+                                track s
+                              ) {
                                 <option [value]="s">{{ s }}</option>
                               }
                             </select>
                           } @else {
-                            <span class="text-xs text-text-muted italic">No schemas</span>
+                            <span class="text-xs text-text-muted italic"
+                              >No schemas</span
+                            >
                           }
                         } @else if (isRefType(getPropType(schI, propI))) {
                           <select
@@ -277,21 +397,31 @@
                             class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                           >
                             <option value="">— schema —</option>
-                            @for (s of state.getSchemaNamesExcluding(schI); track s) {
+                            @for (
+                              s of state.getSchemaNamesExcluding(schI);
+                              track s
+                            ) {
                               <option [value]="s">{{ s }}</option>
                             }
                           </select>
-                        } @else if (getFormatsForType(getPropType(schI, propI)).length > 0) {
+                        } @else if (
+                          getFormatsForType(getPropType(schI, propI)).length > 0
+                        ) {
                           <select
                             formControlName="format"
                             class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                           >
-                            @for (f of getFormatsForType(getPropType(schI, propI)); track f) {
-                              <option [value]="f">{{ f || '—' }}</option>
+                            @for (
+                              f of getFormatsForType(getPropType(schI, propI));
+                              track f
+                            ) {
+                              <option [value]="f">{{ f || "—" }}</option>
                             }
                           </select>
                         } @else {
-                          <span class="text-xs text-text-muted text-center">—</span>
+                          <span class="text-xs text-text-muted text-center"
+                            >—</span
+                          >
                         }
 
                         @if (hasAnyEnumFormat(schI)) {
@@ -302,10 +432,17 @@
                                 placeholder="val1, val2"
                                 rows="2"
                                 class="w-full px-2 py-1 border border-border-light rounded text-[12px] font-mono resize-none bg-surface-alt text-text-primary transition-colors"
-                                aria-label="Property enum values">
+                                aria-label="Property enum values"
+                              >
                               </textarea>
-                              @if (prop.get('enumValues')?.hasError('enumInvalidChar')) {
-                                <p class="text-[10px] text-danger">Invalid characters</p>
+                              @if (
+                                prop
+                                  .get("enumValues")
+                                  ?.hasError("enumInvalidChar")
+                              ) {
+                                <p class="text-[10px] text-danger">
+                                  Invalid characters
+                                </p>
                               }
                             </div>
                           } @else {
@@ -313,29 +450,33 @@
                           }
                         }
 
-                        <!-- 4 flag checkboxes -->
+                        <!-- Deprecated flag -->
                         <div class="flex justify-center items-start pt-1.5">
-                          <input type="checkbox" formControlName="nullable" class="w-3.5 h-3.5 accent-accent" title="Nullable" />
-                        </div>
-                        <div class="flex justify-center items-start pt-1.5">
-                          <input type="checkbox" formControlName="readOnly" class="w-3.5 h-3.5 accent-accent" title="Read Only" />
-                        </div>
-                        <div class="flex justify-center items-start pt-1.5">
-                          <input type="checkbox" formControlName="writeOnly" class="w-3.5 h-3.5 accent-accent" title="Write Only" />
-                        </div>
-                        <div class="flex justify-center items-start pt-1.5">
-                          <input type="checkbox" formControlName="deprecated" class="w-3.5 h-3.5 accent-accent" title="Deprecated" />
+                          <input
+                            type="checkbox"
+                            formControlName="deprecated"
+                            class="w-4 h-4 accent-accent"
+                            title="Deprecated"
+                          />
                         </div>
 
-                        <div class="flex justify-center items-center">
-                          <input type="checkbox" formControlName="required" class="w-4 h-4 accent-accent" />
+                        <div class="flex justify-center items-center pt-1.5">
+                          <input
+                            type="checkbox"
+                            formControlName="required"
+                            class="w-4 h-4 accent-accent"
+                          />
                         </div>
 
-                        <!-- Constraints expand toggle -->
+                        <!-- Constraints modal button -->
                         @if (hasPropConstraints(schI, propI)) {
-                          <button type="button" (click)="togglePropConstraints(schI, propI)"
-                            class="flex justify-center items-center text-text-muted hover:text-accent transition-colors">
-                            <lucide-icon [name]="isPropExpanded(schI, propI) ? 'chevron-up' : 'chevron-down'" [size]="12"></lucide-icon>
+                          <button
+                            type="button"
+                            (click)="openConstraintsModal(schI, propI)"
+                            class="flex justify-center items-start pt-1.5 text-text-muted hover:text-accent transition-colors"
+                            title="Constraints"
+                          >
+                            <lucide-icon name="sliders-horizontal" [size]="13"></lucide-icon>
                           </button>
                         } @else {
                           <span></span>
@@ -344,77 +485,159 @@
                         <button
                           type="button"
                           (click)="forms.removeProperty(schI, propI)"
-                          class="flex items-center justify-center text-text-muted hover:text-danger transition-colors">
+                          class="flex items-start justify-center pt-1.5 text-text-muted hover:text-danger transition-colors"
+                        >
                           <lucide-icon name="trash-2" [size]="14"></lucide-icon>
                         </button>
                       </div>
 
-                      <!-- Expandable constraints sub-row -->
-                      @if (isPropExpanded(schI, propI)) {
-                        <div class="px-4 py-3 bg-surface-muted border-t border-border-row flex flex-wrap gap-3">
-                          @if (getPropType(schI, propI).endsWith('[]')) {
-                            <div class="flex flex-col gap-1.5">
-                              <label class="text-xs font-semibold text-text-secondary">Min Items</label>
-                              <input formControlName="minItems" type="text" placeholder="0"
-                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
+                      <!-- Constraints modal -->
+                      @if (constraintModal?.schI === schI && constraintModal?.propI === propI) {
+                        <div
+                          class="fixed inset-0 z-50 flex items-center justify-center"
+                          (click)="closeConstraintsModal()"
+                        >
+                          <div
+                            class="bg-surface border border-border rounded-xl shadow-2xl p-5 w-80"
+                            (click)="$event.stopPropagation()"
+                          >
+                            <!-- Modal header -->
+                            <div class="flex items-center justify-between mb-4">
+                              <div class="flex items-center gap-2">
+                                <lucide-icon name="sliders-horizontal" [size]="14" class="text-accent"></lucide-icon>
+                                <span class="text-sm font-semibold text-text-primary">Constraints</span>
+                                <span class="font-mono text-xs text-text-muted bg-surface-alt px-1.5 py-0.5 rounded">
+                                  {{ prop.get('name')?.value || 'property' }}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                (click)="closeConstraintsModal()"
+                                class="text-text-muted hover:text-text-primary transition-colors"
+                              >
+                                <lucide-icon name="x" [size]="16"></lucide-icon>
+                              </button>
                             </div>
-                            <div class="flex flex-col gap-1.5">
-                              <label class="text-xs font-semibold text-text-secondary">Max Items</label>
-                              <input formControlName="maxItems" type="text" placeholder="100"
-                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
-                            </div>
-                            <div class="flex items-center gap-2 self-end pb-1.5">
-                              <input type="checkbox" formControlName="uniqueItems" class="w-3.5 h-3.5 accent-accent" />
-                              <label class="text-xs text-text-secondary">Unique Items</label>
-                            </div>
-                          } @else if (isNumericType(getPropType(schI, propI))) {
-                            <div class="flex flex-col gap-1.5">
-                              <label class="text-xs font-semibold text-text-secondary">Minimum</label>
-                              <input formControlName="minimum" type="text" placeholder="0"
-                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
-                            </div>
-                            <div class="flex flex-col gap-1.5">
-                              <label class="text-xs font-semibold text-text-secondary">Maximum</label>
-                              <input formControlName="maximum" type="text" placeholder="100"
-                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
-                            </div>
-                            <div class="flex flex-col gap-1.5">
-                              <label class="text-xs font-semibold text-text-secondary">Multiple Of</label>
-                              <input formControlName="multipleOf" type="text" placeholder="5"
-                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
-                            </div>
-                            <div class="flex items-center gap-2 self-end pb-1.5">
-                              <input type="checkbox" formControlName="exclusiveMinimum" class="w-3.5 h-3.5 accent-accent" />
-                              <label class="text-xs text-text-secondary">Excl. min</label>
-                            </div>
-                            <div class="flex items-center gap-2 self-end pb-1.5">
-                              <input type="checkbox" formControlName="exclusiveMaximum" class="w-3.5 h-3.5 accent-accent" />
-                              <label class="text-xs text-text-secondary">Excl. max</label>
-                            </div>
-                          } @else if (isStringType(getPropType(schI, propI))) {
-                            <div class="flex flex-col gap-1.5">
-                              <label class="text-xs font-semibold text-text-secondary">Min Length</label>
-                              <input formControlName="minLength" type="text" placeholder="0"
-                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
-                            </div>
-                            <div class="flex flex-col gap-1.5">
-                              <label class="text-xs font-semibold text-text-secondary">Max Length</label>
-                              <input formControlName="maxLength" type="text" placeholder="255"
-                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
-                            </div>
-                            <div class="flex flex-col gap-1.5 flex-1 min-w-48">
-                              <label class="text-xs font-semibold text-text-secondary">Pattern</label>
-                              <input formControlName="pattern" type="text" placeholder="^[a-z]+$"
-                                class="border border-border-light rounded-md px-2 py-1.5 text-xs font-mono bg-surface-alt text-text-primary w-full transition-colors" />
-                            </div>
-                          }
+
+                            <!-- Array constraints -->
+                            @if (getPropType(schI, propI).endsWith('[]')) {
+                              <div class="flex flex-col gap-3">
+                                <div class="grid grid-cols-2 gap-3">
+                                  <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-semibold text-text-secondary">Min Items</label>
+                                    <input
+                                      formControlName="minItems"
+                                      type="text"
+                                      placeholder="0"
+                                      class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+                                    />
+                                  </div>
+                                  <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-semibold text-text-secondary">Max Items</label>
+                                    <input
+                                      formControlName="maxItems"
+                                      type="text"
+                                      placeholder="100"
+                                      class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+                                    />
+                                  </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                  <input type="checkbox" formControlName="uniqueItems" class="w-4 h-4 accent-accent" />
+                                  <label class="text-xs text-text-secondary">Unique Items</label>
+                                </div>
+                              </div>
+                            }
+
+                            <!-- Numeric constraints -->
+                            @if (isNumericType(getPropType(schI, propI))) {
+                              <div class="flex flex-col gap-3">
+                                <div class="grid grid-cols-2 gap-3">
+                                  <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-semibold text-text-secondary">Minimum</label>
+                                    <input
+                                      formControlName="minimum"
+                                      type="text"
+                                      placeholder="0"
+                                      class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+                                    />
+                                  </div>
+                                  <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-semibold text-text-secondary">Maximum</label>
+                                    <input
+                                      formControlName="maximum"
+                                      type="text"
+                                      placeholder="100"
+                                      class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+                                    />
+                                  </div>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                  <label class="text-xs font-semibold text-text-secondary">Multiple Of</label>
+                                  <input
+                                    formControlName="multipleOf"
+                                    type="text"
+                                    placeholder="5"
+                                    class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+                                  />
+                                </div>
+                                <div class="flex items-center gap-5">
+                                  <div class="flex items-center gap-2">
+                                    <input type="checkbox" formControlName="exclusiveMinimum" class="w-4 h-4 accent-accent" />
+                                    <label class="text-xs text-text-secondary">Exclusive min</label>
+                                  </div>
+                                  <div class="flex items-center gap-2">
+                                    <input type="checkbox" formControlName="exclusiveMaximum" class="w-4 h-4 accent-accent" />
+                                    <label class="text-xs text-text-secondary">Exclusive max</label>
+                                  </div>
+                                </div>
+                              </div>
+                            }
+
+                            <!-- String constraints -->
+                            @if (isStringType(getPropType(schI, propI))) {
+                              <div class="flex flex-col gap-3">
+                                <div class="grid grid-cols-2 gap-3">
+                                  <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-semibold text-text-secondary">Min Length</label>
+                                    <input
+                                      formControlName="minLength"
+                                      type="text"
+                                      placeholder="0"
+                                      class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+                                    />
+                                  </div>
+                                  <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs font-semibold text-text-secondary">Max Length</label>
+                                    <input
+                                      formControlName="maxLength"
+                                      type="text"
+                                      placeholder="255"
+                                      class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+                                    />
+                                  </div>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                  <label class="text-xs font-semibold text-text-secondary">Pattern</label>
+                                  <input
+                                    formControlName="pattern"
+                                    type="text"
+                                    placeholder="^[a-z]+$"
+                                    class="border border-border rounded-md px-3 py-2 text-xs font-mono bg-surface-alt text-text-primary transition-colors"
+                                  />
+                                </div>
+                              </div>
+                            }
+                          </div>
                         </div>
                       }
                     </div>
                   }
                 </div>
               } @else {
-                <p class="text-xs text-text-muted italic">No properties. Add the first one.</p>
+                <p class="text-xs text-text-muted italic">
+                  No properties. Add the first one.
+                </p>
               }
             </div>
 
@@ -425,16 +648,23 @@
                 formControlName="additionalPropsEnabled"
                 class="w-4 h-4 accent-accent"
               />
-              <label class="text-xs font-semibold text-text-secondary uppercase tracking-wide">
+              <label
+                class="text-xs font-semibold text-text-secondary uppercase tracking-wide"
+              >
                 Additional Properties
               </label>
             </div>
 
-            @if (schema.get('additionalPropsEnabled')?.value) {
-              <div class="col-span-2 grid grid-cols-2 gap-3 border-l-2 border-accent pl-4">
+            @if (schema.get("additionalPropsEnabled")?.value) {
+              <div
+                class="col-span-2 grid grid-cols-2 gap-3 border-l-2 border-accent pl-4"
+              >
                 <!-- Type selector -->
                 <div class="flex flex-col gap-1.5">
-                  <label [for]="'additionalPropsType-' + schI" class="text-xs font-semibold text-text-secondary">
+                  <label
+                    [for]="'additionalPropsType-' + schI"
+                    class="text-xs font-semibold text-text-secondary"
+                  >
                     Type
                   </label>
                   <select
@@ -449,10 +679,17 @@
                 </div>
 
                 <!-- Format/Ref/Composed selector based on type -->
-                @if (isComposedType(schema.get('additionalPropsType')?.value ?? 'string')) {
+                @if (
+                  isComposedType(
+                    schema.get("additionalPropsType")?.value ?? "string"
+                  )
+                ) {
                   @if (state.getSchemaNamesExcluding(schI).length > 0) {
                     <div class="flex flex-col gap-1.5">
-                      <label [for]="'additionalPropsComposed-' + schI" class="text-xs font-semibold text-text-secondary">
+                      <label
+                        [for]="'additionalPropsComposed-' + schI"
+                        class="text-xs font-semibold text-text-secondary"
+                      >
                         Schemas
                       </label>
                       <select
@@ -462,17 +699,29 @@
                         class="border border-border-light rounded-md px-2 py-1 text-xs w-full h-16 bg-surface-alt text-text-primary transition-colors"
                         title="Ctrl+click for multiple"
                       >
-                        @for (s of state.getSchemaNamesExcluding(schI); track s) {
+                        @for (
+                          s of state.getSchemaNamesExcluding(schI);
+                          track s
+                        ) {
                           <option [value]="s">{{ s }}</option>
                         }
                       </select>
                     </div>
                   } @else {
-                    <span class="text-xs text-text-muted italic">No schemas</span>
+                    <span class="text-xs text-text-muted italic"
+                      >No schemas</span
+                    >
                   }
-                } @else if (isRefType(schema.get('additionalPropsType')?.value ?? 'string')) {
+                } @else if (
+                  isRefType(
+                    schema.get("additionalPropsType")?.value ?? "string"
+                  )
+                ) {
                   <div class="flex flex-col gap-1.5">
-                    <label [for]="'additionalPropsRef-' + schI" class="text-xs font-semibold text-text-secondary">
+                    <label
+                      [for]="'additionalPropsRef-' + schI"
+                      class="text-xs font-semibold text-text-secondary"
+                    >
                       Schema
                     </label>
                     <select
@@ -486,9 +735,16 @@
                       }
                     </select>
                   </div>
-                } @else if (getFormatsForType(schema.get('additionalPropsType')?.value ?? 'string').length > 0) {
+                } @else if (
+                  getFormatsForType(
+                    schema.get("additionalPropsType")?.value ?? "string"
+                  ).length > 0
+                ) {
                   <div class="flex flex-col gap-1.5">
-                    <label [for]="'additionalPropsFormat-' + schI" class="text-xs font-semibold text-text-secondary">
+                    <label
+                      [for]="'additionalPropsFormat-' + schI"
+                      class="text-xs font-semibold text-text-secondary"
+                    >
                       Format
                     </label>
                     <select
@@ -496,17 +752,25 @@
                       formControlName="additionalPropsFormat"
                       class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
                     >
-                      @for (f of getFormatsForType(schema.get('additionalPropsType')?.value ?? 'string'); track f) {
-                        <option [value]="f">{{ f || '— none —' }}</option>
+                      @for (
+                        f of getFormatsForType(
+                          schema.get("additionalPropsType")?.value ?? "string"
+                        );
+                        track f
+                      ) {
+                        <option [value]="f">{{ f || "— none —" }}</option>
                       }
                     </select>
                   </div>
                 }
 
                 <!-- Enum values (only if format === 'enum') -->
-                @if (isEnumFormat(schema.get('additionalPropsFormat')?.value)) {
+                @if (isEnumFormat(schema.get("additionalPropsFormat")?.value)) {
                   <div class="col-span-2 flex flex-col gap-1.5">
-                    <label [for]="'additionalPropsEnum-' + schI" class="text-xs font-semibold text-text-primary">
+                    <label
+                      [for]="'additionalPropsEnum-' + schI"
+                      class="text-xs font-semibold text-text-primary"
+                    >
                       Enum Values
                     </label>
                     <textarea
@@ -515,14 +779,24 @@
                       placeholder="value1, value2, value3"
                       rows="3"
                       class="w-full px-2 py-1 border border-border-light rounded text-sm font-mono resize-none bg-surface-alt text-text-primary transition-colors"
-                      aria-label="Enum values, comma-separated">
+                      aria-label="Enum values, comma-separated"
+                    >
                     </textarea>
                     <p class="text-[11px] text-text-muted">
                       Comma-separated values (e.g., red, blue, green)
                     </p>
-                    @if (schema.get('additionalPropsEnum')?.hasError('enumInvalidChar')) {
+                    @if (
+                      schema
+                        .get("additionalPropsEnum")
+                        ?.hasError("enumInvalidChar")
+                    ) {
                       <p class="text-[11px] text-danger mt-1">
-                        ⚠️ {{ schema.get('additionalPropsEnum')?.getError('enumInvalidChar').message }}
+                        ⚠️
+                        {{
+                          schema
+                            .get("additionalPropsEnum")
+                            ?.getError("enumInvalidChar").message
+                        }}
                       </p>
                     }
                   </div>
@@ -532,9 +806,13 @@
           }
 
           <!-- ARRAY -->
-          @if (getKind(schI) === 'array') {
+          @if (getKind(schI) === "array") {
             <div class="flex flex-col gap-1.5">
-              <label [for]="'itemsKind-' + schI" class="text-xs font-semibold text-text-secondary">Items type</label>
+              <label
+                [for]="'itemsKind-' + schI"
+                class="text-xs font-semibold text-text-secondary"
+                >Items type</label
+              >
               <select
                 [id]="'itemsKind-' + schI"
                 formControlName="itemsKind"
@@ -545,9 +823,13 @@
               </select>
             </div>
 
-            @if (getItemsKind(schI) === 'primitive') {
+            @if (getItemsKind(schI) === "primitive") {
               <div class="flex flex-col gap-1.5">
-                <label [for]="'itemsType-' + schI" class="text-xs font-semibold text-text-secondary">Primitive type</label>
+                <label
+                  [for]="'itemsType-' + schI"
+                  class="text-xs font-semibold text-text-secondary"
+                  >Primitive type</label
+                >
                 <select
                   [id]="'itemsType-' + schI"
                   formControlName="itemsType"
@@ -560,9 +842,13 @@
               </div>
             }
 
-            @if (getItemsKind(schI) === '$ref') {
+            @if (getItemsKind(schI) === "$ref") {
               <div class="flex flex-col gap-1.5">
-                <label [for]="'itemsRef-' + schI" class="text-xs font-semibold text-text-secondary">Items schema</label>
+                <label
+                  [for]="'itemsRef-' + schI"
+                  class="text-xs font-semibold text-text-secondary"
+                  >Items schema</label
+                >
                 @if (state.getSchemaNamesExcluding(schI).length > 0) {
                   <select
                     [id]="'itemsRef-' + schI"
@@ -575,32 +861,59 @@
                     }
                   </select>
                 } @else {
-                  <p class="text-xs text-text-muted italic py-2">No other schemas defined yet.</p>
+                  <p class="text-xs text-text-muted italic py-2">
+                    No other schemas defined yet.
+                  </p>
                 }
               </div>
             }
 
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-text-secondary">Min Items</label>
-              <input formControlName="minItems" type="text" placeholder="0"
-                class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+              <label class="text-xs font-semibold text-text-secondary"
+                >Min Items</label
+              >
+              <input
+                formControlName="minItems"
+                type="text"
+                placeholder="0"
+                class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+              />
             </div>
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-text-secondary">Max Items</label>
-              <input formControlName="maxItems" type="text" placeholder="100"
-                class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+              <label class="text-xs font-semibold text-text-secondary"
+                >Max Items</label
+              >
+              <input
+                formControlName="maxItems"
+                type="text"
+                placeholder="100"
+                class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors"
+              />
             </div>
             <div class="flex items-center gap-2 self-end pb-2.5">
-              <input type="checkbox" formControlName="uniqueItems" class="w-4 h-4 accent-accent" />
-              <label class="text-xs font-semibold text-text-secondary">Unique Items</label>
+              <input
+                type="checkbox"
+                formControlName="uniqueItems"
+                class="w-4 h-4 accent-accent"
+              />
+              <label class="text-xs font-semibold text-text-secondary"
+                >Unique Items</label
+              >
             </div>
           }
 
           <!-- $REF / NOT -->
-          @if (getKind(schI) === '$ref' || getKind(schI) === 'not') {
+          @if (getKind(schI) === "$ref" || getKind(schI) === "not") {
             <div class="col-span-2 flex flex-col gap-1.5">
-              <label [for]="'refSchema-' + schI" class="text-xs font-semibold text-text-secondary">
-                {{ getKind(schI) === 'not' ? 'Negated schema (not)' : 'Referenced schema ($ref)' }}
+              <label
+                [for]="'refSchema-' + schI"
+                class="text-xs font-semibold text-text-secondary"
+              >
+                {{
+                  getKind(schI) === "not"
+                    ? "Negated schema (not)"
+                    : "Referenced schema ($ref)"
+                }}
               </label>
               @if (state.getSchemaNamesExcluding(schI).length > 0) {
                 <select
@@ -614,17 +927,28 @@
                   }
                 </select>
               } @else {
-                <p class="text-xs text-text-muted italic py-2">No other schemas defined yet.</p>
+                <p class="text-xs text-text-muted italic py-2">
+                  No other schemas defined yet.
+                </p>
               }
             </div>
           }
 
           <!-- ALLOF / ONEOF / ANYOF -->
-          @if (getKind(schI) === 'allOf' || getKind(schI) === 'oneOf' || getKind(schI) === 'anyOf') {
+          @if (
+            getKind(schI) === "allOf" ||
+            getKind(schI) === "oneOf" ||
+            getKind(schI) === "anyOf"
+          ) {
             <div class="col-span-2 flex flex-col gap-1.5">
-              <label [for]="'composedSchemas-' + schI" class="text-xs font-semibold text-text-secondary">
+              <label
+                [for]="'composedSchemas-' + schI"
+                class="text-xs font-semibold text-text-secondary"
+              >
                 Schemas composing {{ getKind(schI) }}
-                <span class="text-[11px] text-text-muted font-normal ml-1">(Ctrl+click for multiple)</span>
+                <span class="text-[11px] text-text-muted font-normal ml-1"
+                  >(Ctrl+click for multiple)</span
+                >
               </label>
               @if (state.getSchemaNamesExcluding(schI).length > 0) {
                 <select
@@ -638,29 +962,28 @@
                   }
                 </select>
               } @else {
-                <p class="text-xs text-text-muted italic py-2">No other schemas defined yet.</p>
+                <p class="text-xs text-text-muted italic py-2">
+                  No other schemas defined yet.
+                </p>
               }
             </div>
           }
 
-          <!-- Flags (nullable, readOnly, writeOnly, deprecated) -->
-          @if (getKind(schI) !== '$ref' && getKind(schI) !== 'not') {
-            <div class="col-span-2 flex flex-wrap items-center gap-6 border-t border-border-light pt-4">
-              <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">Flags</span>
+          <!-- Flags (deprecated) -->
+          @if (getKind(schI) !== "$ref" && getKind(schI) !== "not") {
+            <div
+              class="col-span-2 flex flex-wrap items-center gap-6 border-t border-border-light pt-4"
+            >
+              <span
+                class="text-xs font-semibold text-text-secondary uppercase tracking-wide"
+                >Flags</span
+              >
               <div class="flex items-center gap-2">
-                <input type="checkbox" formControlName="nullable" class="w-4 h-4 accent-accent" />
-                <label class="text-xs text-text-secondary">Nullable</label>
-              </div>
-              <div class="flex items-center gap-2">
-                <input type="checkbox" formControlName="readOnly" class="w-4 h-4 accent-accent" />
-                <label class="text-xs text-text-secondary">Read Only</label>
-              </div>
-              <div class="flex items-center gap-2">
-                <input type="checkbox" formControlName="writeOnly" class="w-4 h-4 accent-accent" />
-                <label class="text-xs text-text-secondary">Write Only</label>
-              </div>
-              <div class="flex items-center gap-2">
-                <input type="checkbox" formControlName="deprecated" class="w-4 h-4 accent-accent" />
+                <input
+                  type="checkbox"
+                  formControlName="deprecated"
+                  class="w-4 h-4 accent-accent"
+                />
                 <label class="text-xs text-text-secondary">Deprecated</label>
               </div>
             </div>
@@ -668,7 +991,11 @@
 
           <!-- Description -->
           <div class="col-span-2 flex flex-col gap-1.5">
-            <label [for]="'description-' + schI" class="text-xs font-semibold text-text-secondary">Description</label>
+            <label
+              [for]="'description-' + schI"
+              class="text-xs font-semibold text-text-secondary"
+              >Description</label
+            >
             <textarea
               [id]="'description-' + schI"
               formControlName="description"

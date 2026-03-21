@@ -308,9 +308,6 @@ export class OpenApiBuilderService {
       ...(required.length && { required }),
       ...this.buildAdditionalProperties(schema),
     };
-    if (schema.nullable) result.nullable = true;
-    if (schema.readOnly) result.readOnly = true;
-    if (schema.writeOnly) result.writeOnly = true;
     if (schema.deprecated) result.deprecated = true;
     return result;
   }
@@ -348,9 +345,6 @@ export class OpenApiBuilderService {
     }
 
     // Flags
-    if (schema.nullable) result.nullable = true;
-    if (schema.readOnly) result.readOnly = true;
-    if (schema.writeOnly) result.writeOnly = true;
     if (schema.deprecated) result.deprecated = true;
 
     // Only add enum if format === 'enum' and enumValues parsed successfully
@@ -385,9 +379,6 @@ export class OpenApiBuilderService {
     if (minItems !== undefined) result.minItems = minItems;
     if (maxItems !== undefined) result.maxItems = maxItems;
     if (schema.uniqueItems) result.uniqueItems = true;
-    if (schema.nullable) result.nullable = true;
-    if (schema.readOnly) result.readOnly = true;
-    if (schema.writeOnly) result.writeOnly = true;
     if (schema.deprecated) result.deprecated = true;
 
     return result;
@@ -420,9 +411,6 @@ export class OpenApiBuilderService {
       if (minItems !== undefined) refArr.minItems = minItems;
       if (maxItems !== undefined) refArr.maxItems = maxItems;
       if (prop.uniqueItems) refArr.uniqueItems = true;
-      if (prop.nullable) refArr.nullable = true;
-      if (prop.readOnly) refArr.readOnly = true;
-      if (prop.writeOnly) refArr.writeOnly = true;
       if (prop.deprecated) refArr.deprecated = true;
       return refArr;
     }
@@ -458,9 +446,6 @@ export class OpenApiBuilderService {
       if (minItems !== undefined) primArr.minItems = minItems;
       if (maxItems !== undefined) primArr.maxItems = maxItems;
       if (prop.uniqueItems) primArr.uniqueItems = true;
-      if (prop.nullable) primArr.nullable = true;
-      if (prop.readOnly) primArr.readOnly = true;
-      if (prop.writeOnly) primArr.writeOnly = true;
       if (prop.deprecated) primArr.deprecated = true;
       return primArr;
     }
@@ -492,9 +477,6 @@ export class OpenApiBuilderService {
     }
 
     // Flags
-    if (prop.nullable) primitiveSchema.nullable = true;
-    if (prop.readOnly) primitiveSchema.readOnly = true;
-    if (prop.writeOnly) primitiveSchema.writeOnly = true;
     if (prop.deprecated) primitiveSchema.deprecated = true;
 
     // Only add enum if format === 'enum' and enumValues parsed successfully
@@ -705,7 +687,7 @@ export class OpenApiBuilderService {
       minimum: '', maximum: '', exclusiveMinimum: false, exclusiveMaximum: false, multipleOf: '',
       minLength: '', maxLength: '', pattern: '',
       minItems: '', maxItems: '', uniqueItems: false,
-      nullable: false, readOnly: false, writeOnly: false, deprecated: false,
+      deprecated: false,
     };
 
     const builtSchema = this.buildPropertySchema(propertyLike);

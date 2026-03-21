@@ -88,9 +88,6 @@ export interface OpenApiObjectSchema {
   properties?: Record<string, OpenApiSchemaObject>;
   required?: string[];
   additionalProperties?: OpenApiAdditionalProperties;
-  nullable?: boolean;
-  readOnly?: boolean;
-  writeOnly?: boolean;
   deprecated?: boolean;
 }
 
@@ -113,9 +110,6 @@ export interface OpenApiPrimitiveSchema {
   maxLength?: number;
   pattern?: string;
   // Flags
-  nullable?: boolean;
-  readOnly?: boolean;
-  writeOnly?: boolean;
   deprecated?: boolean;
 }
 
@@ -127,9 +121,6 @@ export interface OpenApiArraySchema {
   minItems?: number;
   maxItems?: number;
   uniqueItems?: boolean;
-  nullable?: boolean;
-  readOnly?: boolean;
-  writeOnly?: boolean;
   deprecated?: boolean;
 }
 

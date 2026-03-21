@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { LucideAngularModule, Info, Server, Route, Tag, Shield, Braces, Puzzle, LifeBuoy, AlertTriangle, Search, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
 import { OpenApiFormsService } from '../../services/open-api-forms.service';
 import { SearchModalComponent } from '../search-modal/search-modal.component';
+import { environment } from '../../../environments/environment';
 
 interface SidebarNavItem {
   readonly routePath: string;
@@ -62,5 +63,5 @@ export class AsideComponent {
     },
   ];
 
-  readonly appVersion = 'v1.0.0';
+  readonly appVersion = environment.version;
 }

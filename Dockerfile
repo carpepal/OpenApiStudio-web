@@ -3,13 +3,26 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+# Railway build-time variables
+ARG RAILWAY_GIT_COMMIT_SHA=local
+ARG RAILWAY_GIT_BRANCH=local
+ARG RAILWAY_GIT_TAG=
+
 # Copy dependency manifests first to leverage Docker layer cache
 COPY package.json package-lock.json ./
 RUN npm ci --prefer-offline
 
 # Copy source and build in production mode
 COPY . .
-RUN npm run build -- --configuration production
+
+# Resolve version: use git tag if available, otherwise use short commit SHA
+# Then inject it into the production environment file before building
+RUN SHORT_SHA=$(echo "$RAILWAY_GIT_COMMIT_SHA" | cut -c1-7) && \
+    APP_VERSION="${RAILWAY_GIT_TAG:-$SHORT_SHA}" && \
+    APP_VERSION="${APP_VERSION:-local}" && \
+    echo "Building version: $APP_VERSION (branch: $RAILWAY_GIT_BRANCH)" && \
+    sed -i "s/VERSION_PLACEHOLDER/$APP_VERSION/g" src/environments/environment.production.ts && \
+    npm run build -- --configuration production
 
 # ── Stage 2: Serve ────────────────────────────────────────────────────────────
 FROM nginx:1.27-alpine AS runtime

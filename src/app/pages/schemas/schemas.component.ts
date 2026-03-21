@@ -3,17 +3,17 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MainComponent } from '../../layout/main/main.component';
 import { OpenApiFormsService } from '../../services/open-api-forms.service';
 import { OpenApiStateService } from '../../services/open-api-state.service';
-import { LucideAngularModule, Braces, Plus, Trash2, CircleCheck, TriangleAlert, ChevronUp, ChevronDown, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
+import { LucideAngularModule, Braces, Plus, Trash2, CircleCheck, TriangleAlert, SlidersHorizontal, X, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
 
 @Component({
   selector: 'app-schemas',
   imports: [MainComponent, ReactiveFormsModule, LucideAngularModule],
-  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Braces, Plus, Trash2, CircleCheck, TriangleAlert, ChevronUp, ChevronDown }) }],
+  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Braces, Plus, Trash2, CircleCheck, TriangleAlert, SlidersHorizontal, X }) }],
   templateUrl: './schemas.component.html',
   styleUrl: './schemas.component.scss',
 })
 export class SchemasComponent implements OnInit {
-  private readonly expandedProps = new Set<string>();
+  constraintModal: { schI: number; propI: number } | null = null;
   readonly kinds = ['object', 'primitive', 'array', '$ref', 'allOf', 'oneOf', 'anyOf', 'not'];
   readonly kindLabels: Record<string, string> = {
     object: 'Objeto',
@@ -195,16 +195,11 @@ export class SchemasComponent implements OnInit {
     return type === 'string' || type === 'integer' || type === 'number' || type.endsWith('[]');
   }
 
-  togglePropConstraints(schI: number, propI: number): void {
-    const key = `${schI}-${propI}`;
-    if (this.expandedProps.has(key)) {
-      this.expandedProps.delete(key);
-    } else {
-      this.expandedProps.add(key);
-    }
+  openConstraintsModal(schI: number, propI: number): void {
+    this.constraintModal = { schI, propI };
   }
 
-  isPropExpanded(schI: number, propI: number): boolean {
-    return this.expandedProps.has(`${schI}-${propI}`);
+  closeConstraintsModal(): void {
+    this.constraintModal = null;
   }
 }
