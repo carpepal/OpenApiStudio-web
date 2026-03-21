@@ -1,8 +1,9 @@
-import { Component, HostListener, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { PreviewComponent } from './components/preview/preview.component';
 import { AsideComponent } from './components/aside.component/aside.component';
+import { SpecPersistenceService } from './services/spec-persistence.service';
 
 @Component({
   selector: 'app-root',
@@ -12,6 +13,13 @@ import { AsideComponent } from './components/aside.component/aside.component';
 })
 export class AppComponent {
   readonly title = 'open-api-studio-web';
+  private readonly persistence = inject(SpecPersistenceService);
+
+  constructor() {
+    if (this.persistence.hasSavedSpec()) {
+      this.persistence.restoreSaved();
+    }
+  }
   readonly activePreview = signal(false);
   readonly previewWidth = signal(380);
   readonly isResizing = signal(false);
