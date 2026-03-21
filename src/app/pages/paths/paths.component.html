@@ -207,17 +207,18 @@
 
             @if (forms.getQueryParamGroups(pathI).length > 0) {
               <div class="border border-border-light rounded-lg overflow-hidden">
-                <div class="grid grid-cols-[1fr_8rem_3.5rem_1fr_2rem] gap-2 px-3 py-2 bg-surface-alt text-[11px] text-text-tertiary font-semibold uppercase tracking-wide border-b border-border-light">
+                <div class="grid grid-cols-[1fr_8rem_3.5rem_1fr_1fr_2rem] gap-2 px-3 py-2 bg-surface-alt text-[11px] text-text-tertiary font-semibold uppercase tracking-wide border-b border-border-light">
                   <span>Name</span>
                   <span>Type</span>
                   <span class="text-center">Req.</span>
                   <span>Description</span>
+                  <span>Default</span>
                   <span></span>
                 </div>
                 @for (param of forms.getQueryParamGroups(pathI); track paramI; let paramI = $index) {
                   <div
                     [formGroupName]="paramI"
-                    class="grid grid-cols-[1fr_8rem_3.5rem_1fr_2rem] gap-2 items-center px-3 py-2 border-b border-border-row last:border-b-0 hover:bg-surface-alt/50 transition-colors"
+                    class="grid grid-cols-[1fr_8rem_3.5rem_1fr_1fr_2rem] gap-2 items-center px-3 py-2 border-b border-border-row last:border-b-0 hover:bg-surface-alt/50 transition-colors"
                   >
                     <input
                       formControlName="name"
@@ -242,6 +243,12 @@
                       placeholder="Description..."
                       class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                     />
+                    <input
+                      formControlName="default"
+                      type="text"
+                      placeholder="Default..."
+                      class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                    />
                     <button
                       type="button"
                       (click)="forms.removeQueryParam(pathI, paramI)"
@@ -258,7 +265,7 @@
 
           <!-- REQUEST BODY -->
           @if (!forms.isMethodWithoutBody(endpoint.get('method')?.value)) {
-          <div class="col-span-2 flex flex-col gap-3 border-t border-border-light pt-5" formArrayName="requestBody">
+          <div class="col-span-2 flex flex-col gap-3 border-t border-border-light pt-5">
             <div class="flex items-center justify-between">
               <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">Request Body</span>
               <button
@@ -269,6 +276,25 @@
                 Add Content
               </button>
             </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" formControlName="requestBodyRequired" class="w-4 h-4 accent-accent" />
+                <label class="text-xs font-semibold text-text-secondary">Required</label>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label [for]="'rbDesc-' + pathI" class="text-xs font-semibold text-text-secondary">Description</label>
+                <input
+                  [id]="'rbDesc-' + pathI"
+                  type="text"
+                  formControlName="requestBodyDescription"
+                  placeholder="Request body description..."
+                  class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="col-span-2 flex flex-col gap-3" formArrayName="requestBody">
 
             @if (forms.getRequestBodyGroups(pathI).length > 0) {
               <div class="border border-border-light rounded-lg overflow-hidden">

@@ -16,7 +16,12 @@ export class OpenApiFormsService {
       version: [''],
       description: [''],
       contactEmail: [''],
+      contactName: [''],
+      contactUrl: [''],
       license: [''],
+      licenseUrl: [''],
+      externalDocsUrl: [''],
+      externalDocsDescription: [''],
     });
 
     this.serversForm = this.fb.array([this.createServer()]);
@@ -48,6 +53,7 @@ export class OpenApiFormsService {
       schemeName: [''], type: ['apiKey'], description: [''],
       paramName: [''], in: ['header'],
       scheme: ['bearer'], bearerFormat: [''],
+      oauthFlow: ['authorizationCode'],
       authorizationUrl: [''], tokenUrl: [''], scopes: [''],
       openIdConnectUrl: [''],
     });
@@ -62,14 +68,16 @@ export class OpenApiFormsService {
       name: [''], type: ['string'], format: [''],
       refSchema: [''], composedSchemas: [[]], required: [false],
       enumValues: ['', [this.createEnumValidator()]],
+      default: [''],
     });
   }
 
   createSchema(): FormGroup {
     return this.fb.group({
-      name: [''], kind: ['object'], description: [''],
+      name: [''], kind: ['object'], title: [''], description: [''],
       type: ['string'], format: [''], example: [''],
       enumValues: ['', [this.createEnumValidator()]],
+      default: [''],
       properties: this.fb.array([]),
       additionalPropsEnabled: [false],
       additionalPropsType: ['string'],
@@ -106,6 +114,8 @@ export class OpenApiFormsService {
       path: [''], method: ['get'], operationId: [''], summary: [''],
       tags: [[]], security: [[]], description: [''],
       requestBody: this.fb.array([]),
+      requestBodyRequired: [false],
+      requestBodyDescription: [''],
       queryParams: this.fb.array([]),
       pathParams: this.fb.array([]),
       responses: this.fb.array([]),
@@ -147,7 +157,7 @@ export class OpenApiFormsService {
   removeRequestBodyContent(pathIndex: number, contentIndex: number) { this.getRequestBody(pathIndex).removeAt(contentIndex); }
 
   createQueryParam(): FormGroup {
-    return this.fb.group({ name: [''], type: ['string'], required: [false], description: [''] });
+    return this.fb.group({ name: [''], type: ['string'], required: [false], description: [''], default: [''] });
   }
   getQueryParams(pathIndex: number): FormArray {
     return this.pathsForm.at(pathIndex).get('queryParams') as FormArray;

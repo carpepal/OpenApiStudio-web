@@ -5,7 +5,12 @@ export interface ApiInfoFormValue {
   version: string;
   description: string;
   contactEmail: string;
+  contactName: string;
+  contactUrl: string;
   license: string;
+  licenseUrl: string;
+  externalDocsUrl: string;
+  externalDocsDescription: string;
 }
 
 export interface ServerFormValue {
@@ -31,6 +36,7 @@ export interface SchemeFormValue {
   scheme: string;
   bearerFormat: string;
   // oauth2
+  oauthFlow: string;
   authorizationUrl: string;
   tokenUrl: string;
   scopes: string;
@@ -46,18 +52,21 @@ export interface PropertyFormValue {
   composedSchemas: string[];
   required: boolean;
   enumValues: string;
+  default: string;
 }
 
 
 export interface SchemaFormValue {
   name: string;
   kind: 'object' | 'primitive' | 'array' | '$ref' | 'allOf' | 'oneOf' | 'anyOf' | 'not';
+  title: string;
   description: string;
   // primitive
   type: string;
   format: string;
   example: string;
   enumValues: string;
+  default: string;
   // object
   properties: PropertyFormValue[];
   additionalPropsEnabled: boolean;
@@ -86,6 +95,7 @@ export interface QueryParamFormValue {
   type: string;
   required: boolean;
   description: string;
+  default: string;
 }
 
 export interface RequestBodyContentFormValue {
@@ -112,6 +122,8 @@ export interface PathFormValue {
   tags: string[];
   security: string[];
   requestBody: RequestBodyContentFormValue[];
+  requestBodyRequired: boolean;
+  requestBodyDescription: string;
   description: string;
   pathParams: PathParamFormValue[];
   queryParams: QueryParamFormValue[];

@@ -189,7 +189,12 @@ export class OpenApiImportService {
       version: spec.info.version ?? '',
       description: spec.info.description ?? '',
       contactEmail: spec.info.contact?.email ?? '',
+      contactName: spec.info.contact?.name ?? '',
+      contactUrl: spec.info.contact?.url ?? '',
       license: spec.info.license?.name ?? '',
+      licenseUrl: spec.info.license?.url ?? '',
+      externalDocsUrl: spec.externalDocs?.url ?? '',
+      externalDocsDescription: spec.externalDocs?.description ?? '',
     });
   }
 
@@ -263,6 +268,7 @@ export class OpenApiImportService {
   private mapSchema(name: string, schema: OpenApiSchemaObject): Record<string, unknown> {
     const base: Record<string, unknown> = {
       name,
+      title: ('title' in schema ? (schema as { title?: string }).title : '') ?? '',
       description: ('description' in schema ? schema.description : '') ?? '',
       properties: [],
       additionalPropsEnabled: false,
@@ -280,6 +286,7 @@ export class OpenApiImportService {
       format: '',
       example: '',
       enumValues: '',
+      default: '',
     };
 
     if ('$ref' in schema) {
@@ -325,6 +332,7 @@ export class OpenApiImportService {
         type: primitive.type,
         format: primitive.format ?? '',
         example: primitive.example ?? '',
+        default: primitive.default !== undefined ? String(primitive.default) : '',
       };
       if (primitive.enum?.length) {
         primitiveResult['format'] = 'enum';
@@ -345,6 +353,7 @@ export class OpenApiImportService {
       composedSchemas: [],
       required,
       enumValues: '',
+      default: '',
     };
 
     if ('$ref' in schema) {
@@ -389,6 +398,7 @@ export class OpenApiImportService {
         result.format = 'enum';
         result.enumValues = (primitive.enum as Array<string | number | boolean>).join(', ');
       }
+      if (primitive.default !== undefined) result.default = String(primitive.default);
       return result;
     }
 
@@ -437,6 +447,7 @@ export class OpenApiImportService {
       in: 'header',
       scheme: 'bearer',
       bearerFormat: '',
+      oauthFlow: 'authorizationCode',
       authorizationUrl: '',
       tokenUrl: '',
       scopes: '',
@@ -449,9 +460,22 @@ export class OpenApiImportService {
       case 'http':
         return { ...base, scheme: scheme.scheme ?? 'bearer', bearerFormat: scheme.bearerFormat ?? '' };
       case 'oauth2': {
-        const flow = scheme.flows?.authorizationCode;
+        const flows = scheme.flows ?? {};
+        if (flows.implicit) {
+          const scopes = Object.keys(flows.implicit.scopes ?? {}).join(' ');
+          return { ...base, oauthFlow: 'implicit', authorizationUrl: flows.implicit.authorizationUrl ?? '', scopes };
+        }
+        if (flows.password) {
+          const scopes = Object.keys(flows.password.scopes ?? {}).join(' ');
+          return { ...base, oauthFlow: 'password', tokenUrl: flows.password.tokenUrl ?? '', scopes };
+        }
+        if (flows.clientCredentials) {
+          const scopes = Object.keys(flows.clientCredentials.scopes ?? {}).join(' ');
+          return { ...base, oauthFlow: 'clientCredentials', tokenUrl: flows.clientCredentials.tokenUrl ?? '', scopes };
+        }
+        const flow = flows.authorizationCode;
         const scopes = Object.keys(flow?.scopes ?? {}).join(' ');
-        return { ...base, authorizationUrl: flow?.authorizationUrl ?? '', tokenUrl: flow?.tokenUrl ?? '', scopes };
+        return { ...base, oauthFlow: 'authorizationCode', authorizationUrl: flow?.authorizationUrl ?? '', tokenUrl: flow?.tokenUrl ?? '', scopes };
       }
       case 'openIdConnect':
         return { ...base, openIdConnectUrl: scheme.openIdConnectUrl ?? '' };
@@ -525,7 +549,13 @@ export class OpenApiImportService {
 
         const queryParams = params
           .filter(p => p.in === 'query')
-          .map(p => ({ name: p.name, type: p.schema?.type ?? 'string', required: !!p.required, description: p.description ?? '' }));
+          .map(p => ({
+            name: p.name,
+            type: p.schema?.type ?? 'string',
+            required: !!p.required,
+            description: p.description ?? '',
+            default: p.schema?.default !== undefined ? String(p.schema.default) : '',
+          }));
 
         const requestBody = Object.entries(operation.requestBody?.content ?? {}).map(
           ([mimeType, entry]) => ({
@@ -554,6 +584,8 @@ export class OpenApiImportService {
           description: operation.description ?? '',
           tags,
           security,
+          requestBodyRequired: operation.requestBody?.required ?? false,
+          requestBodyDescription: (operation.requestBody as { description?: string } | undefined)?.description ?? '',
         });
 
         // Rebuild nested FormArrays

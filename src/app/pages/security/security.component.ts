@@ -16,10 +16,15 @@ export class SecurityComponent {
   readonly securityTypes = ['apiKey', 'http', 'oauth2', 'openIdConnect'];
   readonly apiKeyLocations = ['header', 'query', 'cookie'];
   readonly httpSchemes = ['bearer', 'basic', 'digest'];
+  readonly oauthFlows = ['implicit', 'password', 'clientCredentials', 'authorizationCode'];
 
   constructor(public forms: OpenApiFormsService) {}
 
   getType(index: number): string {
     return this.forms.schemesForm.at(index).get('type')?.value ?? 'apiKey';
+  }
+
+  getOAuthFlow(index: number): string {
+    return this.forms.schemesForm.at(index).get('oauthFlow')?.value ?? 'authorizationCode';
   }
 }

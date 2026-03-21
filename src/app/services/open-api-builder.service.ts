@@ -22,6 +22,7 @@ import {
   OpenApiComposedSchema,
   OpenApiNotSchema,
   OpenApiSecurityScheme,
+  OpenApiOAuth2Scheme,
   OpenApiAdditionalProperties,
 } from '../models/open-api.models';
 import {
@@ -70,6 +71,12 @@ export class OpenApiBuilderService {
       info: this.buildInfo(),
     };
 
+    const v = this.forms.apiInfoForm.value as ApiInfoFormValue;
+    if (v.externalDocsUrl) {
+      spec.externalDocs = { url: v.externalDocsUrl };
+      if (v.externalDocsDescription) spec.externalDocs.description = v.externalDocsDescription;
+    }
+
     const servers = this.buildServers();
     if (servers.length) spec.servers = servers;
 
@@ -94,8 +101,16 @@ export class OpenApiBuilderService {
       version: v.version || '1.0.0',
     };
     if (v.description) info.description = v.description;
-    if (v.contactEmail) info.contact = { email: v.contactEmail };
-    if (v.license) info.license = { name: v.license };
+    if (v.contactEmail || v.contactName || v.contactUrl) {
+      info.contact = {};
+      if (v.contactName) info.contact.name = v.contactName;
+      if (v.contactUrl) info.contact.url = v.contactUrl;
+      if (v.contactEmail) info.contact.email = v.contactEmail;
+    }
+    if (v.license) {
+      info.license = { name: v.license };
+      if (v.licenseUrl) info.license.url = v.licenseUrl;
+    }
     return info;
   }
 
@@ -155,13 +170,18 @@ export class OpenApiBuilderService {
 
     const queryParams: OpenApiParameter[] = (endpoint.queryParams ?? [])
       .filter((p: QueryParamFormValue) => p.name)
-      .map((p: QueryParamFormValue) => ({
-        in: 'query' as const,
-        name: p.name,
-        required: !!p.required,
-        schema: { type: (p.type || 'string') as OpenApiPrimitiveSchema['type'] },
-        ...(p.description && { description: p.description }),
-      }));
+      .map((p: QueryParamFormValue) => {
+        const schema: OpenApiPrimitiveSchema = { type: (p.type || 'string') as OpenApiPrimitiveSchema['type'] };
+        const parsedDefault = this.parseDefaultValue(p.default, p.type || 'string');
+        if (parsedDefault !== undefined) schema.default = parsedDefault;
+        return {
+          in: 'query' as const,
+          name: p.name,
+          required: !!p.required,
+          schema,
+          ...(p.description && { description: p.description }),
+        };
+      });
 
     return [...pathParams, ...queryParams];
   }
@@ -195,7 +215,10 @@ export class OpenApiBuilderService {
     for (const c of filtered) {
       content[c.mimeType] = { schema: { $ref: `#/components/schemas/${c.schema}` } };
     }
-    return { content };
+    const rb: OpenApiRequestBody = { content };
+    if (endpoint.requestBodyRequired) rb.required = true;
+    if (endpoint.requestBodyDescription) rb.description = endpoint.requestBodyDescription;
+    return rb;
   }
 
   private buildResponses(endpoint: PathFormValue): Record<string, OpenApiResponse> {
@@ -275,6 +298,7 @@ export class OpenApiBuilderService {
 
     return {
       type: 'object',
+      ...(schema.title?.trim() && { title: schema.title }),
       ...(schema.description && { description: schema.description }),
       ...(Object.keys(properties).length && { properties }),
       ...(required.length && { required }),
@@ -287,6 +311,7 @@ export class OpenApiBuilderService {
 
     const result: OpenApiPrimitiveSchema = {
       type,
+      ...(schema.title?.trim() && { title: schema.title }),
       ...(schema.description?.trim() && { description: schema.description }),
       ...(schema.format?.trim() && schema.format !== 'enum' && { format: schema.format }),
       ...(schema.example?.trim() && { example: schema.example }),
@@ -300,6 +325,9 @@ export class OpenApiBuilderService {
       }
     }
 
+    const parsedDefault = this.parseDefaultValue(schema.default, type);
+    if (parsedDefault !== undefined) result.default = parsedDefault;
+
     return result;
   }
 
@@ -311,6 +339,7 @@ export class OpenApiBuilderService {
 
     return {
       type: 'array',
+      ...(schema.title?.trim() && { title: schema.title }),
       items,
       ...(schema.description && { description: schema.description }),
     };
@@ -321,6 +350,7 @@ export class OpenApiBuilderService {
       $ref: `#/components/schemas/${n}`,
     }));
     return {
+      ...(schema.title?.trim() && { title: schema.title }),
       [schema.kind]: refs,
       ...(schema.description && { description: schema.description }),
     };
@@ -383,6 +413,9 @@ export class OpenApiBuilderService {
       }
     }
 
+    const parsedDefault = this.parseDefaultValue(prop.default, type);
+    if (parsedDefault !== undefined) primitiveSchema.default = parsedDefault;
+
     return primitiveSchema;
   }
 
@@ -415,15 +448,20 @@ export class OpenApiBuilderService {
           const scopes = Object.fromEntries(
             (s.scopes ?? '').split(/\s+/).filter(Boolean).map(sc => [sc, '']),
           );
+          const flow = s.oauthFlow || 'authorizationCode';
+          const flows: OpenApiOAuth2Scheme['flows'] = {};
+          if (flow === 'implicit') {
+            flows.implicit = { authorizationUrl: s.authorizationUrl, scopes };
+          } else if (flow === 'password') {
+            flows.password = { tokenUrl: s.tokenUrl, scopes };
+          } else if (flow === 'clientCredentials') {
+            flows.clientCredentials = { tokenUrl: s.tokenUrl, scopes };
+          } else {
+            flows.authorizationCode = { authorizationUrl: s.authorizationUrl, tokenUrl: s.tokenUrl, scopes };
+          }
           schemes[s.schemeName] = {
             type: 'oauth2',
-            flows: {
-              authorizationCode: {
-                authorizationUrl: s.authorizationUrl,
-                tokenUrl: s.tokenUrl,
-                scopes,
-              },
-            },
+            flows,
             ...(s.description && { description: s.description }),
           };
           break;
@@ -439,6 +477,34 @@ export class OpenApiBuilderService {
     }
 
     return schemes;
+  }
+
+  // ── Default Value Parser ──────────────────────────────────────────────────
+
+  private parseDefaultValue(
+    value: string | undefined,
+    type: string,
+  ): string | number | boolean | undefined {
+    if (!value?.trim()) return undefined;
+    const v = value.trim();
+    try {
+      if (type === 'integer') {
+        if (!/^-?\d+$/.test(v)) return undefined;
+        return parseInt(v, 10);
+      }
+      if (type === 'number') {
+        const n = parseFloat(v);
+        return isNaN(n) ? undefined : n;
+      }
+      if (type === 'boolean') {
+        if (v === 'true' || v === '1') return true;
+        if (v === 'false' || v === '0') return false;
+        return undefined;
+      }
+      return v;
+    } catch {
+      return undefined;
+    }
   }
 
   // ── Enum Values Parser ────────────────────────────────────────────────────
@@ -529,6 +595,7 @@ export class OpenApiBuilderService {
       composedSchemas: schema.additionalPropsComposed || [],
       required: false, // Not used in additionalProperties context
       enumValues: schema.additionalPropsEnum || '',
+      default: '',
     };
 
     const builtSchema = this.buildPropertySchema(propertyLike);
