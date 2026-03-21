@@ -3,12 +3,13 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MainComponent } from '../../layout/main/main.component';
 import { OpenApiFormsService } from '../../services/open-api-forms.service';
 import { OpenApiStateService } from '../../services/open-api-state.service';
-import { LucideAngularModule, Route, Plus, Trash2, CircleCheck, TriangleAlert, CircleAlert, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
+import { LucideAngularModule, Plus, Trash2, CircleCheck, TriangleAlert, CircleAlert, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 @Component({
   selector: 'app-paths',
-  imports: [MainComponent, ReactiveFormsModule, LucideAngularModule],
-  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Route, Plus, Trash2, CircleCheck, TriangleAlert, CircleAlert }) }],
+  imports: [MainComponent, ReactiveFormsModule, LucideAngularModule, PageHeaderComponent],
+  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Plus, Trash2, CircleCheck, TriangleAlert, CircleAlert }) }],
   templateUrl: './paths.component.html',
   styleUrl: './paths.component.scss',
 })

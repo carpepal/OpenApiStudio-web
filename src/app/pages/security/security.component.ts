@@ -3,12 +3,13 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MainComponent } from '../../layout/main/main.component';
 import { PanelComponent } from '../../components/panel/panel.component';
 import { OpenApiFormsService } from '../../services/open-api-forms.service';
-import { LucideAngularModule, Shield, Plus, Trash2, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
+import { LucideAngularModule, Trash2, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 @Component({
   selector: 'app-security',
-  imports: [MainComponent, PanelComponent, ReactiveFormsModule, LucideAngularModule],
-  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Shield, Plus, Trash2 }) }],
+  imports: [MainComponent, PanelComponent, ReactiveFormsModule, LucideAngularModule, PageHeaderComponent],
+  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Trash2 }) }],
   templateUrl: './security.component.html',
   styleUrl: './security.component.scss',
 })

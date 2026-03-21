@@ -1,20 +1,5 @@
 <app-main-layout>
-  <!-- Content Header -->
-  <div class="flex items-center justify-between mb-6">
-    <div class="flex items-center gap-3">
-      <lucide-icon name="shield" [size]="24" class="text-accent"></lucide-icon>
-      <div>
-        <h2 class="text-xl font-semibold text-text-primary">Security Schemes</h2>
-        <p class="text-sm text-text-secondary">Configure authentication and authorization</p>
-      </div>
-    </div>
-    <button
-      (click)="forms.addScheme()"
-      class="flex items-center gap-2 bg-accent text-text-on-dark text-sm font-semibold rounded-md px-5 py-2.5 hover:bg-accent-hover transition-colors">
-      <lucide-icon name="plus" [size]="16"></lucide-icon>
-      Add Scheme
-    </button>
-  </div>
+  <app-page-header icon="shield" title="Security Schemes" subtitle="Configure authentication and authorization" actionLabel="Add Scheme" (action)="forms.addScheme()" />
 
   @for (scheme of forms.schemeGroups; track $index) {
     <app-panel [attr.id]="'item-security-' + $index">

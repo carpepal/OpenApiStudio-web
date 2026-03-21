@@ -3,12 +3,14 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MainComponent } from '../../layout/main/main.component';
 import { OpenApiFormsService } from '../../services/open-api-forms.service';
 import { OpenApiStateService } from '../../services/open-api-state.service';
-import { LucideAngularModule, Braces, Plus, Trash2, CircleCheck, TriangleAlert, SlidersHorizontal, X, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
+import { LucideAngularModule, Plus, Trash2, CircleCheck, TriangleAlert, SlidersHorizontal, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { ConstraintsModalComponent } from '../../components/constraints-modal/constraints-modal.component';
 
 @Component({
   selector: 'app-schemas',
-  imports: [MainComponent, ReactiveFormsModule, LucideAngularModule],
-  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Braces, Plus, Trash2, CircleCheck, TriangleAlert, SlidersHorizontal, X }) }],
+  imports: [MainComponent, ReactiveFormsModule, LucideAngularModule, PageHeaderComponent, ConstraintsModalComponent],
+  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Plus, Trash2, CircleCheck, TriangleAlert, SlidersHorizontal }) }],
   templateUrl: './schemas.component.html',
   styleUrl: './schemas.component.scss',
 })

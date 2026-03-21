@@ -1,20 +1,5 @@
 <app-main-layout>
-  <!-- Content Header -->
-  <div class="flex items-center justify-between mb-6">
-    <div class="flex items-center gap-3">
-      <lucide-icon name="tag" [size]="24" class="text-accent"></lucide-icon>
-      <div>
-        <h2 class="text-xl font-semibold text-text-primary">Tags</h2>
-        <p class="text-sm text-text-secondary">Group your API operations with tags</p>
-      </div>
-    </div>
-    <button
-      (click)="forms.addTag()"
-      class="flex items-center gap-2 bg-accent text-text-on-dark text-sm font-semibold rounded-md px-5 py-2.5 hover:bg-accent-hover transition-colors">
-      <lucide-icon name="plus" [size]="16"></lucide-icon>
-      Add Tag
-    </button>
-  </div>
+  <app-page-header icon="tag" title="Tags" subtitle="Group your API operations with tags" actionLabel="Add Tag" (action)="forms.addTag()" />
 
   @for (tag of forms.tagGroups; track $index) {
     <app-panel [attr.id]="'item-tag-' + $index">

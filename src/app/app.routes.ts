@@ -1,10 +1,4 @@
 import { Routes } from '@angular/router';
-import { ApiInfoComponent } from './pages/api-info/api-info.component';
-import { ServerComponent } from './pages/server/server.component';
-import { TagsComponent } from './pages/tags/tags.component';
-import { SecurityComponent } from './pages/security/security.component';
-import { SchemasComponent } from './pages/schemas/schemas.component';
-import { PathsComponent } from './pages/paths/paths.component';
 
 export const routes: Routes = [
   {
@@ -14,27 +8,27 @@ export const routes: Routes = [
   },
   {
     path: 'api-info',
-    component: ApiInfoComponent,
+    loadComponent: () => import('./pages/api-info/api-info.component').then(m => m.ApiInfoComponent),
   },
   {
     path: 'server',
-    component: ServerComponent,
+    loadComponent: () => import('./pages/server/server.component').then(m => m.ServerComponent),
   },
   {
     path: 'tags',
-    component: TagsComponent,
+    loadComponent: () => import('./pages/tags/tags.component').then(m => m.TagsComponent),
   },
   {
     path: 'security',
-    component: SecurityComponent,
+    loadComponent: () => import('./pages/security/security.component').then(m => m.SecurityComponent),
   },
   {
     path: 'schemas',
-    component: SchemasComponent,
+    loadComponent: () => import('./pages/schemas/schemas.component').then(m => m.SchemasComponent),
   },
   {
     path: 'paths',
-    component: PathsComponent,
+    loadComponent: () => import('./pages/paths/paths.component').then(m => m.PathsComponent),
   },
   {
     path: '**',

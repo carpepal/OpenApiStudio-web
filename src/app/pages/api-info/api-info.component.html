@@ -1,12 +1,5 @@
 <app-main-layout>
-  <!-- Content Header -->
-  <div class="flex items-center gap-3 mb-6">
-    <lucide-icon name="info" [size]="24" class="text-accent"></lucide-icon>
-    <div>
-      <h2 class="text-xl font-semibold text-text-primary">API Info</h2>
-      <p class="text-sm text-text-secondary">General information about your API</p>
-    </div>
-  </div>
+  <app-page-header icon="info" title="API Info" subtitle="General information about your API" />
 
   <app-panel>
     <form [formGroup]="forms.apiInfoForm" class="grid grid-cols-2 gap-5">

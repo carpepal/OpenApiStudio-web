@@ -1,0 +1,142 @@
+<div
+  class="fixed inset-0 z-50 flex items-center justify-center"
+  (click)="closed.emit()"
+>
+  <div
+    [formGroup]="prop"
+    class="bg-surface border border-border rounded-xl shadow-2xl p-5 w-80"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Constraints"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal header -->
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <lucide-icon name="sliders-horizontal" [size]="14" class="text-accent"></lucide-icon>
+        <span class="text-sm font-semibold text-text-primary">Constraints</span>
+        <span class="font-mono text-xs text-text-muted bg-surface-alt px-1.5 py-0.5 rounded">
+          {{ prop.get('name')?.value || 'property' }}
+        </span>
+      </div>
+      <button
+        type="button"
+        (click)="closed.emit()"
+        class="text-text-muted hover:text-text-primary transition-colors"
+        aria-label="Close constraints"
+      >
+        <lucide-icon name="x" [size]="16"></lucide-icon>
+      </button>
+    </div>
+
+    <!-- Array constraints -->
+    @if (propType.endsWith('[]')) {
+      <div class="flex flex-col gap-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-text-secondary">Min Items</label>
+            <input
+              formControlName="minItems"
+              type="text"
+              placeholder="0"
+              class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+            />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-text-secondary">Max Items</label>
+            <input
+              formControlName="maxItems"
+              type="text"
+              placeholder="100"
+              class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+            />
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" formControlName="uniqueItems" class="w-4 h-4 accent-accent" />
+          <label class="text-xs text-text-secondary">Unique Items</label>
+        </div>
+      </div>
+    }
+
+    <!-- Numeric constraints -->
+    @if (isNumericType(propType)) {
+      <div class="flex flex-col gap-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-text-secondary">Minimum</label>
+            <input
+              formControlName="minimum"
+              type="text"
+              placeholder="0"
+              class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+            />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-text-secondary">Maximum</label>
+            <input
+              formControlName="maximum"
+              type="text"
+              placeholder="100"
+              class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+            />
+          </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-text-secondary">Multiple Of</label>
+          <input
+            formControlName="multipleOf"
+            type="text"
+            placeholder="5"
+            class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+          />
+        </div>
+        <div class="flex items-center gap-5">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" formControlName="exclusiveMinimum" class="w-4 h-4 accent-accent" />
+            <label class="text-xs text-text-secondary">Exclusive min</label>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="checkbox" formControlName="exclusiveMaximum" class="w-4 h-4 accent-accent" />
+            <label class="text-xs text-text-secondary">Exclusive max</label>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- String constraints -->
+    @if (isStringType(propType)) {
+      <div class="flex flex-col gap-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-text-secondary">Min Length</label>
+            <input
+              formControlName="minLength"
+              type="text"
+              placeholder="0"
+              class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+            />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-text-secondary">Max Length</label>
+            <input
+              formControlName="maxLength"
+              type="text"
+              placeholder="255"
+              class="border border-border rounded-md px-3 py-2 text-xs bg-surface-alt text-text-primary transition-colors"
+            />
+          </div>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-text-secondary">Pattern</label>
+          <input
+            formControlName="pattern"
+            type="text"
+            placeholder="^[a-z]+$"
+            class="border border-border rounded-md px-3 py-2 text-xs font-mono bg-surface-alt text-text-primary transition-colors"
+          />
+        </div>
+      </div>
+    }
+  </div>
+</div>
