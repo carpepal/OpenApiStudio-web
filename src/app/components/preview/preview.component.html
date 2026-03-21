@@ -6,12 +6,13 @@
     <div class="flex-1"></div>
 
     <!-- Format toggle pill -->
-    <div class="flex bg-surface-muted rounded-md p-0.5">
+    <div class="flex bg-surface-muted rounded-md p-0.5" role="group" aria-label="Output format">
       <button
         (click)="setTab('json')"
         [class.bg-accent]="activeTab() === 'json'"
         [class.text-text-on-dark]="activeTab() === 'json'"
         [class.text-text-muted]="activeTab() !== 'json'"
+        [attr.aria-pressed]="activeTab() === 'json'"
         class="px-3 py-1 text-xs font-mono rounded transition-colors">
         JSON
       </button>
@@ -20,6 +21,7 @@
         [class.bg-accent]="activeTab() === 'yaml'"
         [class.text-text-on-dark]="activeTab() === 'yaml'"
         [class.text-text-muted]="activeTab() !== 'yaml'"
+        [attr.aria-pressed]="activeTab() === 'yaml'"
         class="px-3 py-1 text-xs font-mono rounded transition-colors">
         YAML
       </button>
@@ -36,7 +38,8 @@
     <!-- Download button -->
     <button
       (click)="download()"
-      class="flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors p-1.5 rounded-md bg-surface-muted border border-border-light hover:bg-surface">
+      class="flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors p-1.5 rounded-md bg-surface-muted border border-border-light hover:bg-surface"
+      aria-label="Download file">
       <lucide-icon name="download" [size]="14"></lucide-icon>
     </button>
   </div>

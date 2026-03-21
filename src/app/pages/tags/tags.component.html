@@ -23,7 +23,8 @@
         @if (forms.tagsForm.length > 1) {
           <button
             (click)="forms.removeTag($index)"
-            class="text-text-muted hover:text-danger transition-colors">
+            class="text-text-muted hover:text-danger transition-colors"
+            aria-label="Delete tag">
             <lucide-icon name="trash-2" [size]="16"></lucide-icon>
           </button>
         }
