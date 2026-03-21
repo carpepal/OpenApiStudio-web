@@ -8,6 +8,9 @@
     <div
       class="w-1.5 shrink-0 cursor-col-resize bg-border-light hover:bg-accent-light transition-colors"
       [class.bg-accent-light]="isResizing()"
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize preview panel"
       (mousedown)="startResize($event)"
     ></div>
     <app-preview

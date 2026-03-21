@@ -23,7 +23,8 @@
         @if (forms.serversForm.length > 1) {
           <button
             (click)="forms.removeServer($index)"
-            class="text-text-muted hover:text-danger transition-colors">
+            class="text-text-muted hover:text-danger transition-colors"
+            aria-label="Delete server">
             <lucide-icon name="trash-2" [size]="16"></lucide-icon>
           </button>
         }

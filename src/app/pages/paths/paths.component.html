@@ -38,7 +38,8 @@
         @if (forms.pathsForm.length > 1) {
           <button
             (click)="forms.removePath(pathI)"
-            class="text-text-muted hover:text-danger transition-colors">
+            class="text-text-muted hover:text-danger transition-colors"
+            aria-label="Delete endpoint">
             <lucide-icon name="trash-2" [size]="16"></lucide-icon>
           </button>
         }
@@ -174,6 +175,7 @@
                     <span class="text-xs font-mono text-accent">{{ '{' + param.get('name')?.value + '}' }}</span>
                     <select
                       formControlName="type"
+                      [attr.aria-label]="'Type for ' + param.get('name')?.value"
                       class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                     >
                       @for (t of paramTypes; track t) {
@@ -184,6 +186,7 @@
                       formControlName="description"
                       type="text"
                       placeholder="Description..."
+                      [attr.aria-label]="'Description for ' + param.get('name')?.value"
                       class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                     />
                   </div>
@@ -227,10 +230,12 @@
                       formControlName="name"
                       type="text"
                       placeholder="page"
+                      aria-label="Parameter name"
                       class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                     />
                     <select
                       formControlName="type"
+                      aria-label="Parameter type"
                       class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                     >
                       @for (t of paramTypes; track t) {
@@ -239,6 +244,7 @@
                     </select>
                     <select
                       formControlName="style"
+                      aria-label="Parameter style"
                       class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                     >
                       @for (s of queryParamStyles; track s) {
@@ -246,30 +252,33 @@
                       }
                     </select>
                     <div class="flex justify-center">
-                      <input type="checkbox" formControlName="explode" class="w-4 h-4 accent-accent" />
+                      <input type="checkbox" formControlName="explode" class="w-4 h-4 accent-accent" aria-label="Explode" />
                     </div>
                     <div class="flex justify-center">
-                      <input type="checkbox" formControlName="required" class="w-4 h-4 accent-accent" />
+                      <input type="checkbox" formControlName="required" class="w-4 h-4 accent-accent" aria-label="Required" />
                     </div>
                     <input
                       formControlName="description"
                       type="text"
                       placeholder="Description..."
+                      aria-label="Parameter description"
                       class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                     />
                     <input
                       formControlName="default"
                       type="text"
                       placeholder="Default..."
+                      aria-label="Default value"
                       class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                     />
                     <div class="flex justify-center">
-                      <input type="checkbox" formControlName="allowEmptyValue" class="w-4 h-4 accent-accent" />
+                      <input type="checkbox" formControlName="allowEmptyValue" class="w-4 h-4 accent-accent" aria-label="Allow empty value" />
                     </div>
                     <button
                       type="button"
                       (click)="forms.removeQueryParam(pathI, paramI)"
-                      class="flex items-center justify-center text-text-muted hover:text-danger transition-colors">
+                      class="flex items-center justify-center text-text-muted hover:text-danger transition-colors"
+                      aria-label="Delete parameter">
                       <lucide-icon name="trash-2" [size]="14"></lucide-icon>
                     </button>
                   </div>
@@ -296,8 +305,8 @@
 
             <div class="grid grid-cols-2 gap-3">
               <div class="flex items-center gap-2">
-                <input type="checkbox" formControlName="requestBodyRequired" class="w-4 h-4 accent-accent" />
-                <label class="text-xs font-semibold text-text-secondary">Required</label>
+                <input type="checkbox" formControlName="requestBodyRequired" [id]="'rbRequired-' + pathI" class="w-4 h-4 accent-accent" />
+                <label [for]="'rbRequired-' + pathI" class="text-xs font-semibold text-text-secondary">Required</label>
               </div>
               <div class="flex flex-col gap-1.5">
                 <label [for]="'rbDesc-' + pathI" class="text-xs font-semibold text-text-secondary">Description</label>
@@ -327,6 +336,7 @@
                   >
                     <select
                       formControlName="mimeType"
+                      aria-label="MIME type"
                       class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                     >
                       <option value="application/json">application/json</option>
@@ -338,6 +348,7 @@
                     @if (state.schemaNames().length > 0) {
                       <select
                         formControlName="schema"
+                        aria-label="Schema"
                         class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                       >
                         <option value="">— none —</option>
@@ -351,7 +362,8 @@
                     <button
                       type="button"
                       (click)="forms.removeRequestBodyContent(pathI, contI)"
-                      class="flex items-center justify-center text-text-muted hover:text-danger transition-colors">
+                      class="flex items-center justify-center text-text-muted hover:text-danger transition-colors"
+                      aria-label="Delete content">
                       <lucide-icon name="trash-2" [size]="14"></lucide-icon>
                     </button>
                   </div>
@@ -391,6 +403,7 @@
                           formControlName="statusCode"
                           type="text"
                           placeholder="200"
+                          aria-label="Status code"
                           class="border rounded-md px-2 py-1 text-xs w-full font-mono bg-surface-alt text-text-primary transition-colors"
                           [class.border-danger-border]="forms.isStatusCodeDuplicate(pathI, respI)"
                           [class.border-border-light]="!forms.isStatusCodeDuplicate(pathI, respI)"
@@ -403,19 +416,21 @@
                         formControlName="description"
                         type="text"
                         placeholder="OK"
+                        aria-label="Response description"
                         class="border border-border-light rounded-md px-2 py-1 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                       />
                       <button
                         type="button"
                         (click)="forms.removeResponse(pathI, respI)"
-                        class="text-text-muted hover:text-danger transition-colors px-1">
+                        class="text-text-muted hover:text-danger transition-colors px-1"
+                        aria-label="Delete response">
                         <lucide-icon name="trash-2" [size]="14"></lucide-icon>
                       </button>
                     </div>
 
                     <div class="px-3 py-2 flex flex-col gap-1" formArrayName="contents">
                       @if (forms.getContentGroups(pathI, respI).length > 0) {
-                        <div class="grid grid-cols-[8rem_1fr_2rem] gap-2 text-[11px] text-text-muted font-semibold uppercase tracking-wide mb-1">
+                        <div class="grid grid-cols-[10rem_1fr_2rem] gap-2 text-[11px] text-text-muted font-semibold uppercase tracking-wide mb-1">
                           <span>MIME type</span>
                           <span>Schema</span>
                           <span></span>
@@ -423,10 +438,11 @@
                         @for (content of forms.getContentGroups(pathI, respI); track contI; let contI = $index) {
                           <div
                             [formGroupName]="contI"
-                            class="grid grid-cols-[8rem_1fr_2rem] gap-2 items-center"
+                            class="grid grid-cols-[10rem_1fr_2rem] gap-2 items-center"
                           >
                             <select
                               formControlName="mimeType"
+                              aria-label="Response MIME type"
                               class="border border-border-light rounded-md px-2 py-1 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                             >
                               <option value="application/json">application/json</option>
@@ -437,6 +453,7 @@
                             @if (state.schemaNames().length > 0) {
                               <select
                                 formControlName="schema"
+                                aria-label="Response schema"
                                 class="border border-border-light rounded-md px-2 py-1 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                               >
                                 <option value="">— none —</option>
@@ -450,7 +467,8 @@
                             <button
                               type="button"
                               (click)="forms.removeContent(pathI, respI, contI)"
-                              class="flex items-center justify-center text-text-muted hover:text-danger transition-colors">
+                              class="flex items-center justify-center text-text-muted hover:text-danger transition-colors"
+                              aria-label="Delete content">
                               <lucide-icon name="trash-2" [size]="14"></lucide-icon>
                             </button>
                           </div>
