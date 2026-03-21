@@ -69,6 +69,10 @@ export class OpenApiFormsService {
       refSchema: [''], composedSchemas: [[]], required: [false],
       enumValues: ['', [this.createEnumValidator()]],
       default: [''],
+      minimum: [''], maximum: [''], exclusiveMinimum: [false], exclusiveMaximum: [false], multipleOf: [''],
+      minLength: [''], maxLength: [''], pattern: [''],
+      minItems: [''], maxItems: [''], uniqueItems: [false],
+      nullable: [false], readOnly: [false], writeOnly: [false], deprecated: [false],
     });
   }
 
@@ -87,6 +91,10 @@ export class OpenApiFormsService {
       additionalPropsEnum: ['', [this.createEnumValidator()]],
       itemsKind: ['$ref'], itemsType: ['string'], itemsRef: [''],
       refSchema: [''], composedSchemas: [[]],
+      minimum: [''], maximum: [''], exclusiveMinimum: [false], exclusiveMaximum: [false], multipleOf: [''],
+      minLength: [''], maxLength: [''], pattern: [''],
+      minItems: [''], maxItems: [''], uniqueItems: [false],
+      nullable: [false], readOnly: [false], writeOnly: [false], deprecated: [false],
     });
   }
   get schemaGroups(): FormGroup[] { return this.schemasForm.controls as FormGroup[]; }
@@ -157,7 +165,10 @@ export class OpenApiFormsService {
   removeRequestBodyContent(pathIndex: number, contentIndex: number) { this.getRequestBody(pathIndex).removeAt(contentIndex); }
 
   createQueryParam(): FormGroup {
-    return this.fb.group({ name: [''], type: ['string'], required: [false], description: [''], default: [''] });
+    return this.fb.group({
+      name: [''], type: ['string'], required: [false], description: [''], default: [''],
+      style: ['form'], explode: [true], allowEmptyValue: [false],
+    });
   }
   getQueryParams(pathIndex: number): FormArray {
     return this.pathsForm.at(pathIndex).get('queryParams') as FormArray;

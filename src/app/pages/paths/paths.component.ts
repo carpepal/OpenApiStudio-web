@@ -15,6 +15,7 @@ import { LucideAngularModule, Route, Plus, Trash2, CircleCheck, TriangleAlert, C
 export class PathsComponent {
   readonly methods = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'];
   readonly paramTypes = ['string', 'integer', 'number', 'boolean'];
+  readonly queryParamStyles = ['form', 'spaceDelimited', 'pipeDelimited', 'deepObject'];
 
   readonly methodBadgeClasses: Record<string, string> = {
     get: 'bg-badge-green-bg text-badge-green-text',

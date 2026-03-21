@@ -154,6 +154,50 @@
                 }
               </div>
             }
+
+            @if (isNumericType(getPrimitiveType(schI))) {
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-text-secondary">Minimum</label>
+                <input formControlName="minimum" type="text" placeholder="0"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-text-secondary">Maximum</label>
+                <input formControlName="maximum" type="text" placeholder="100"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-text-secondary">Multiple Of</label>
+                <input formControlName="multipleOf" type="text" placeholder="5"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+              </div>
+              <div class="flex items-center gap-2 self-end pb-2.5">
+                <input type="checkbox" formControlName="exclusiveMinimum" class="w-4 h-4 accent-accent" />
+                <label class="text-xs text-text-secondary">Excl. min</label>
+              </div>
+              <div class="flex items-center gap-2 self-end pb-2.5">
+                <input type="checkbox" formControlName="exclusiveMaximum" class="w-4 h-4 accent-accent" />
+                <label class="text-xs text-text-secondary">Excl. max</label>
+              </div>
+            }
+
+            @if (isStringType(getPrimitiveType(schI))) {
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-text-secondary">Min Length</label>
+                <input formControlName="minLength" type="text" placeholder="0"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-text-secondary">Max Length</label>
+                <input formControlName="maxLength" type="text" placeholder="255"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+              </div>
+              <div class="col-span-2 flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-text-secondary">Pattern</label>
+                <input formControlName="pattern" type="text" placeholder="^[a-z]+$"
+                  class="border border-border rounded-md px-3 py-2.5 text-sm font-mono bg-surface-alt text-text-primary h-10 transition-colors" />
+              </div>
+            }
           }
 
           <!-- OBJECT: properties table -->
@@ -173,106 +217,199 @@
               @if (forms.getPropertyGroups(schI).length > 0) {
                 <div class="border border-border-light rounded-lg overflow-hidden" formArrayName="properties">
                   <div class="grid gap-2 px-3 py-2 bg-surface-alt text-[11px] text-text-tertiary font-semibold uppercase tracking-wide border-b border-border-light"
-                       [style.grid-template-columns]="hasAnyEnumFormat(schI) ? '1fr 10rem 1fr 1fr 3.5rem 2rem' : '1fr 10rem 1fr 3.5rem 2rem'">
+                       [style.grid-template-columns]="hasAnyEnumFormat(schI) ? '1fr 10rem 1fr 1fr 1.75rem 1.75rem 1.75rem 1.75rem 3.5rem 1.75rem 1.75rem' : '1fr 10rem 1fr 1.75rem 1.75rem 1.75rem 1.75rem 3.5rem 1.75rem 1.75rem'">
                     <span>Name</span>
                     <span>Type</span>
                     <span>Format / Ref</span>
                     @if (hasAnyEnumFormat(schI)) {
                       <span>Enum</span>
                     }
+                    <span class="text-center" title="Nullable">N</span>
+                    <span class="text-center" title="Read Only">RO</span>
+                    <span class="text-center" title="Write Only">WO</span>
+                    <span class="text-center" title="Deprecated">Dep</span>
                     <span class="text-center">Req.</span>
+                    <span></span>
                     <span></span>
                   </div>
 
                   @for (prop of forms.getPropertyGroups(schI); track propI; let propI = $index) {
-                    <div
-                      [formGroupName]="propI"
-                      class="grid gap-2 items-start px-3 py-2 border-b border-border-row last:border-b-0 hover:bg-surface-alt/50 transition-colors"
-                      [style.grid-template-columns]="hasAnyEnumFormat(schI) ? '1fr 10rem 1fr 1fr 3.5rem 2rem' : '1fr 10rem 1fr 3.5rem 2rem'"
-                    >
-                      <input
-                        formControlName="name"
-                        type="text"
-                        placeholder="property"
-                        class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
-                      />
-
-                      <select
-                        formControlName="type"
-                        class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                    <div [formGroupName]="propI" class="border-b border-border-row last:border-b-0">
+                      <!-- Main property row -->
+                      <div
+                        class="grid gap-2 items-start px-3 py-2 hover:bg-surface-alt/50 transition-colors"
+                        [style.grid-template-columns]="hasAnyEnumFormat(schI) ? '1fr 10rem 1fr 1fr 1.75rem 1.75rem 1.75rem 1.75rem 3.5rem 1.75rem 1.75rem' : '1fr 10rem 1fr 1.75rem 1.75rem 1.75rem 1.75rem 3.5rem 1.75rem 1.75rem'"
                       >
-                        @for (pt of propertyTypes; track pt) {
-                          <option [value]="pt">{{ pt }}</option>
-                        }
-                      </select>
+                        <input
+                          formControlName="name"
+                          type="text"
+                          placeholder="property"
+                          class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                        />
 
-                      @if (isComposedType(getPropType(schI, propI))) {
-                        @if (state.getSchemaNamesExcluding(schI).length > 0) {
+                        <select
+                          formControlName="type"
+                          class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                        >
+                          @for (pt of propertyTypes; track pt) {
+                            <option [value]="pt">{{ pt }}</option>
+                          }
+                        </select>
+
+                        @if (isComposedType(getPropType(schI, propI))) {
+                          @if (state.getSchemaNamesExcluding(schI).length > 0) {
+                            <select
+                              formControlName="composedSchemas"
+                              multiple
+                              class="border border-border-light rounded-md px-2 py-1 text-xs w-full h-16 bg-surface-alt text-text-primary transition-colors"
+                              title="Ctrl+click for multiple"
+                            >
+                              @for (s of state.getSchemaNamesExcluding(schI); track s) {
+                                <option [value]="s">{{ s }}</option>
+                              }
+                            </select>
+                          } @else {
+                            <span class="text-xs text-text-muted italic">No schemas</span>
+                          }
+                        } @else if (isRefType(getPropType(schI, propI))) {
                           <select
-                            formControlName="composedSchemas"
-                            multiple
-                            class="border border-border-light rounded-md px-2 py-1 text-xs w-full h-16 bg-surface-alt text-text-primary transition-colors"
-                            title="Ctrl+click for multiple"
+                            formControlName="refSchema"
+                            class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                           >
+                            <option value="">— schema —</option>
                             @for (s of state.getSchemaNamesExcluding(schI); track s) {
                               <option [value]="s">{{ s }}</option>
                             }
                           </select>
-                        } @else {
-                          <span class="text-xs text-text-muted italic">No schemas</span>
-                        }
-                      } @else if (isRefType(getPropType(schI, propI))) {
-                        <select
-                          formControlName="refSchema"
-                          class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
-                        >
-                          <option value="">— schema —</option>
-                          @for (s of state.getSchemaNamesExcluding(schI); track s) {
-                            <option [value]="s">{{ s }}</option>
-                          }
-                        </select>
-                      } @else if (getFormatsForType(getPropType(schI, propI)).length > 0) {
-                        <select
-                          formControlName="format"
-                          class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
-                        >
-                          @for (f of getFormatsForType(getPropType(schI, propI)); track f) {
-                            <option [value]="f">{{ f || '—' }}</option>
-                          }
-                        </select>
-                      } @else {
-                        <span class="text-xs text-text-muted text-center">—</span>
-                      }
-
-                      @if (hasAnyEnumFormat(schI)) {
-                        @if (isEnumFormat(getPropFormat(schI, propI))) {
-                          <div class="flex flex-col gap-1">
-                            <textarea
-                              formControlName="enumValues"
-                              placeholder="val1, val2"
-                              rows="2"
-                              class="w-full px-2 py-1 border border-border-light rounded text-[12px] font-mono resize-none bg-surface-alt text-text-primary transition-colors"
-                              aria-label="Property enum values">
-                            </textarea>
-                            @if (prop.get('enumValues')?.hasError('enumInvalidChar')) {
-                              <p class="text-[10px] text-danger">Invalid characters</p>
+                        } @else if (getFormatsForType(getPropType(schI, propI)).length > 0) {
+                          <select
+                            formControlName="format"
+                            class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                          >
+                            @for (f of getFormatsForType(getPropType(schI, propI)); track f) {
+                              <option [value]="f">{{ f || '—' }}</option>
                             }
-                          </div>
+                          </select>
+                        } @else {
+                          <span class="text-xs text-text-muted text-center">—</span>
+                        }
+
+                        @if (hasAnyEnumFormat(schI)) {
+                          @if (isEnumFormat(getPropFormat(schI, propI))) {
+                            <div class="flex flex-col gap-1">
+                              <textarea
+                                formControlName="enumValues"
+                                placeholder="val1, val2"
+                                rows="2"
+                                class="w-full px-2 py-1 border border-border-light rounded text-[12px] font-mono resize-none bg-surface-alt text-text-primary transition-colors"
+                                aria-label="Property enum values">
+                              </textarea>
+                              @if (prop.get('enumValues')?.hasError('enumInvalidChar')) {
+                                <p class="text-[10px] text-danger">Invalid characters</p>
+                              }
+                            </div>
+                          } @else {
+                            <span></span>
+                          }
+                        }
+
+                        <!-- 4 flag checkboxes -->
+                        <div class="flex justify-center items-start pt-1.5">
+                          <input type="checkbox" formControlName="nullable" class="w-3.5 h-3.5 accent-accent" title="Nullable" />
+                        </div>
+                        <div class="flex justify-center items-start pt-1.5">
+                          <input type="checkbox" formControlName="readOnly" class="w-3.5 h-3.5 accent-accent" title="Read Only" />
+                        </div>
+                        <div class="flex justify-center items-start pt-1.5">
+                          <input type="checkbox" formControlName="writeOnly" class="w-3.5 h-3.5 accent-accent" title="Write Only" />
+                        </div>
+                        <div class="flex justify-center items-start pt-1.5">
+                          <input type="checkbox" formControlName="deprecated" class="w-3.5 h-3.5 accent-accent" title="Deprecated" />
+                        </div>
+
+                        <div class="flex justify-center items-center">
+                          <input type="checkbox" formControlName="required" class="w-4 h-4 accent-accent" />
+                        </div>
+
+                        <!-- Constraints expand toggle -->
+                        @if (hasPropConstraints(schI, propI)) {
+                          <button type="button" (click)="togglePropConstraints(schI, propI)"
+                            class="flex justify-center items-center text-text-muted hover:text-accent transition-colors">
+                            <lucide-icon [name]="isPropExpanded(schI, propI) ? 'chevron-up' : 'chevron-down'" [size]="12"></lucide-icon>
+                          </button>
                         } @else {
                           <span></span>
                         }
-                      }
 
-                      <div class="flex justify-center items-center">
-                        <input type="checkbox" formControlName="required" class="w-4 h-4 accent-accent" />
+                        <button
+                          type="button"
+                          (click)="forms.removeProperty(schI, propI)"
+                          class="flex items-center justify-center text-text-muted hover:text-danger transition-colors">
+                          <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+                        </button>
                       </div>
 
-                      <button
-                        type="button"
-                        (click)="forms.removeProperty(schI, propI)"
-                        class="flex items-center justify-center text-text-muted hover:text-danger transition-colors">
-                        <lucide-icon name="trash-2" [size]="14"></lucide-icon>
-                      </button>
+                      <!-- Expandable constraints sub-row -->
+                      @if (isPropExpanded(schI, propI)) {
+                        <div class="px-4 py-3 bg-surface-muted border-t border-border-row flex flex-wrap gap-3">
+                          @if (getPropType(schI, propI).endsWith('[]')) {
+                            <div class="flex flex-col gap-1.5">
+                              <label class="text-xs font-semibold text-text-secondary">Min Items</label>
+                              <input formControlName="minItems" type="text" placeholder="0"
+                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                              <label class="text-xs font-semibold text-text-secondary">Max Items</label>
+                              <input formControlName="maxItems" type="text" placeholder="100"
+                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
+                            </div>
+                            <div class="flex items-center gap-2 self-end pb-1.5">
+                              <input type="checkbox" formControlName="uniqueItems" class="w-3.5 h-3.5 accent-accent" />
+                              <label class="text-xs text-text-secondary">Unique Items</label>
+                            </div>
+                          } @else if (isNumericType(getPropType(schI, propI))) {
+                            <div class="flex flex-col gap-1.5">
+                              <label class="text-xs font-semibold text-text-secondary">Minimum</label>
+                              <input formControlName="minimum" type="text" placeholder="0"
+                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                              <label class="text-xs font-semibold text-text-secondary">Maximum</label>
+                              <input formControlName="maximum" type="text" placeholder="100"
+                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                              <label class="text-xs font-semibold text-text-secondary">Multiple Of</label>
+                              <input formControlName="multipleOf" type="text" placeholder="5"
+                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
+                            </div>
+                            <div class="flex items-center gap-2 self-end pb-1.5">
+                              <input type="checkbox" formControlName="exclusiveMinimum" class="w-3.5 h-3.5 accent-accent" />
+                              <label class="text-xs text-text-secondary">Excl. min</label>
+                            </div>
+                            <div class="flex items-center gap-2 self-end pb-1.5">
+                              <input type="checkbox" formControlName="exclusiveMaximum" class="w-3.5 h-3.5 accent-accent" />
+                              <label class="text-xs text-text-secondary">Excl. max</label>
+                            </div>
+                          } @else if (isStringType(getPropType(schI, propI))) {
+                            <div class="flex flex-col gap-1.5">
+                              <label class="text-xs font-semibold text-text-secondary">Min Length</label>
+                              <input formControlName="minLength" type="text" placeholder="0"
+                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                              <label class="text-xs font-semibold text-text-secondary">Max Length</label>
+                              <input formControlName="maxLength" type="text" placeholder="255"
+                                class="border border-border-light rounded-md px-2 py-1.5 text-xs bg-surface-alt text-text-primary w-24 transition-colors" />
+                            </div>
+                            <div class="flex flex-col gap-1.5 flex-1 min-w-48">
+                              <label class="text-xs font-semibold text-text-secondary">Pattern</label>
+                              <input formControlName="pattern" type="text" placeholder="^[a-z]+$"
+                                class="border border-border-light rounded-md px-2 py-1.5 text-xs font-mono bg-surface-alt text-text-primary w-full transition-colors" />
+                            </div>
+                          }
+                        </div>
+                      }
                     </div>
                   }
                 </div>
@@ -442,6 +579,21 @@
                 }
               </div>
             }
+
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-text-secondary">Min Items</label>
+              <input formControlName="minItems" type="text" placeholder="0"
+                class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-text-secondary">Max Items</label>
+              <input formControlName="maxItems" type="text" placeholder="100"
+                class="border border-border rounded-md px-3 py-2.5 text-sm bg-surface-alt text-text-primary h-10 transition-colors" />
+            </div>
+            <div class="flex items-center gap-2 self-end pb-2.5">
+              <input type="checkbox" formControlName="uniqueItems" class="w-4 h-4 accent-accent" />
+              <label class="text-xs font-semibold text-text-secondary">Unique Items</label>
+            </div>
           }
 
           <!-- $REF / NOT -->
@@ -488,6 +640,29 @@
               } @else {
                 <p class="text-xs text-text-muted italic py-2">No other schemas defined yet.</p>
               }
+            </div>
+          }
+
+          <!-- Flags (nullable, readOnly, writeOnly, deprecated) -->
+          @if (getKind(schI) !== '$ref' && getKind(schI) !== 'not') {
+            <div class="col-span-2 flex flex-wrap items-center gap-6 border-t border-border-light pt-4">
+              <span class="text-xs font-semibold text-text-secondary uppercase tracking-wide">Flags</span>
+              <div class="flex items-center gap-2">
+                <input type="checkbox" formControlName="nullable" class="w-4 h-4 accent-accent" />
+                <label class="text-xs text-text-secondary">Nullable</label>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="checkbox" formControlName="readOnly" class="w-4 h-4 accent-accent" />
+                <label class="text-xs text-text-secondary">Read Only</label>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="checkbox" formControlName="writeOnly" class="w-4 h-4 accent-accent" />
+                <label class="text-xs text-text-secondary">Write Only</label>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="checkbox" formControlName="deprecated" class="w-4 h-4 accent-accent" />
+                <label class="text-xs text-text-secondary">Deprecated</label>
+              </div>
             </div>
           }
 

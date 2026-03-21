@@ -53,6 +53,9 @@ export interface OpenApiParameter {
   required: boolean;
   schema: OpenApiPrimitiveSchema;
   description?: string;
+  style?: string;
+  explode?: boolean;
+  allowEmptyValue?: boolean;
 }
 
 export interface OpenApiRequestBody {
@@ -85,6 +88,10 @@ export interface OpenApiObjectSchema {
   properties?: Record<string, OpenApiSchemaObject>;
   required?: string[];
   additionalProperties?: OpenApiAdditionalProperties;
+  nullable?: boolean;
+  readOnly?: boolean;
+  writeOnly?: boolean;
+  deprecated?: boolean;
 }
 
 export interface OpenApiPrimitiveSchema {
@@ -95,6 +102,21 @@ export interface OpenApiPrimitiveSchema {
   example?: string;
   enum?: string[] | number[] | boolean[];
   default?: string | number | boolean;
+  // Numeric constraints
+  minimum?: number;
+  maximum?: number;
+  exclusiveMinimum?: boolean;
+  exclusiveMaximum?: boolean;
+  multipleOf?: number;
+  // String constraints
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+  // Flags
+  nullable?: boolean;
+  readOnly?: boolean;
+  writeOnly?: boolean;
+  deprecated?: boolean;
 }
 
 export interface OpenApiArraySchema {
@@ -102,6 +124,13 @@ export interface OpenApiArraySchema {
   title?: string;
   items: OpenApiSchemaObject;
   description?: string;
+  minItems?: number;
+  maxItems?: number;
+  uniqueItems?: boolean;
+  nullable?: boolean;
+  readOnly?: boolean;
+  writeOnly?: boolean;
+  deprecated?: boolean;
 }
 
 export interface OpenApiRefSchema {

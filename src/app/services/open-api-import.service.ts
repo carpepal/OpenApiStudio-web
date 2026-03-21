@@ -7,6 +7,8 @@ import {
   OpenApiSpec,
   OpenApiSchemaObject,
   OpenApiPrimitiveSchema,
+  OpenApiArraySchema,
+  OpenApiObjectSchema,
   OpenApiSecurityScheme,
   OpenApiOperation,
   OpenApiParameter,
@@ -287,6 +289,10 @@ export class OpenApiImportService {
       example: '',
       enumValues: '',
       default: '',
+      minimum: '', maximum: '', exclusiveMinimum: false, exclusiveMaximum: false, multipleOf: '',
+      minLength: '', maxLength: '', pattern: '',
+      minItems: '', maxItems: '', uniqueItems: false,
+      nullable: false, readOnly: false, writeOnly: false, deprecated: false,
     };
 
     if ('$ref' in schema) {
@@ -307,22 +313,39 @@ export class OpenApiImportService {
     }
     if ('type' in schema) {
       if (schema.type === 'object') {
-        const requiredSet = new Set(schema.required ?? []);
-        const properties = Object.entries(schema.properties ?? {}).map(
+        const objSchema = schema as OpenApiObjectSchema;
+        const requiredSet = new Set(objSchema.required ?? []);
+        const properties = Object.entries(objSchema.properties ?? {}).map(
           ([propName, propSchema]) => this.mapProperty(propName, propSchema, requiredSet.has(propName)),
         );
-        const addlProps = this.mapAdditionalProperties(schema.additionalProperties);
-        return { ...base, kind: 'object', properties, ...addlProps };
+        const addlProps = this.mapAdditionalProperties(objSchema.additionalProperties);
+        return {
+          ...base, kind: 'object', properties, ...addlProps,
+          nullable: objSchema.nullable ?? false,
+          readOnly: objSchema.readOnly ?? false,
+          writeOnly: objSchema.writeOnly ?? false,
+          deprecated: objSchema.deprecated ?? false,
+        };
       }
       if (schema.type === 'array') {
-        const items = schema.items;
+        const arrSchema = schema as OpenApiArraySchema;
+        const arrFields = {
+          minItems: arrSchema.minItems !== undefined ? String(arrSchema.minItems) : '',
+          maxItems: arrSchema.maxItems !== undefined ? String(arrSchema.maxItems) : '',
+          uniqueItems: arrSchema.uniqueItems ?? false,
+          nullable: arrSchema.nullable ?? false,
+          readOnly: arrSchema.readOnly ?? false,
+          writeOnly: arrSchema.writeOnly ?? false,
+          deprecated: arrSchema.deprecated ?? false,
+        };
+        const items = arrSchema.items;
         if (items && '$ref' in items) {
-          return { ...base, kind: 'array', itemsKind: '$ref', itemsRef: this.extractSchemaName(items.$ref) };
+          return { ...base, kind: 'array', itemsKind: '$ref', itemsRef: this.extractSchemaName(items.$ref), ...arrFields };
         }
         if (items && 'type' in items) {
-          return { ...base, kind: 'array', itemsKind: 'primitive', itemsType: items.type };
+          return { ...base, kind: 'array', itemsKind: 'primitive', itemsType: (items as OpenApiPrimitiveSchema).type, ...arrFields };
         }
-        return { ...base, kind: 'array' };
+        return { ...base, kind: 'array', ...arrFields };
       }
       // Primitive — safe cast: object and array branches already returned above
       const primitive = schema as OpenApiPrimitiveSchema;
@@ -333,6 +356,18 @@ export class OpenApiImportService {
         format: primitive.format ?? '',
         example: primitive.example ?? '',
         default: primitive.default !== undefined ? String(primitive.default) : '',
+        minimum: primitive.minimum !== undefined ? String(primitive.minimum) : '',
+        maximum: primitive.maximum !== undefined ? String(primitive.maximum) : '',
+        exclusiveMinimum: primitive.exclusiveMinimum ?? false,
+        exclusiveMaximum: primitive.exclusiveMaximum ?? false,
+        multipleOf: primitive.multipleOf !== undefined ? String(primitive.multipleOf) : '',
+        minLength: primitive.minLength !== undefined ? String(primitive.minLength) : '',
+        maxLength: primitive.maxLength !== undefined ? String(primitive.maxLength) : '',
+        pattern: primitive.pattern ?? '',
+        nullable: primitive.nullable ?? false,
+        readOnly: primitive.readOnly ?? false,
+        writeOnly: primitive.writeOnly ?? false,
+        deprecated: primitive.deprecated ?? false,
       };
       if (primitive.enum?.length) {
         primitiveResult['format'] = 'enum';
@@ -354,6 +389,10 @@ export class OpenApiImportService {
       required,
       enumValues: '',
       default: '',
+      minimum: '', maximum: '', exclusiveMinimum: false, exclusiveMaximum: false, multipleOf: '',
+      minLength: '', maxLength: '', pattern: '',
+      minItems: '', maxItems: '', uniqueItems: false,
+      nullable: false, readOnly: false, writeOnly: false, deprecated: false,
     };
 
     if ('$ref' in schema) {
@@ -374,15 +413,25 @@ export class OpenApiImportService {
     }
     if ('type' in schema) {
       if (schema.type === 'array') {
-        const items = schema.items;
+        const arrSchema = schema as OpenApiArraySchema;
+        const arrFields = {
+          minItems: arrSchema.minItems !== undefined ? String(arrSchema.minItems) : '',
+          maxItems: arrSchema.maxItems !== undefined ? String(arrSchema.maxItems) : '',
+          uniqueItems: arrSchema.uniqueItems ?? false,
+          nullable: arrSchema.nullable ?? false,
+          readOnly: arrSchema.readOnly ?? false,
+          writeOnly: arrSchema.writeOnly ?? false,
+          deprecated: arrSchema.deprecated ?? false,
+        };
+        const items = arrSchema.items;
         if ('$ref' in items) {
-          return { ...base, type: '$ref[]', refSchema: this.extractSchemaName(items.$ref) };
+          return { ...base, type: '$ref[]', refSchema: this.extractSchemaName(items.$ref), ...arrFields };
         }
         if ('type' in items) {
           // Safe cast: array items are never object/array in our model
           const primitiveItems = items as OpenApiPrimitiveSchema;
           const itemType = `${primitiveItems.type}[]`;
-          const result: PropertyFormValue = { ...base, type: itemType };
+          const result: PropertyFormValue = { ...base, type: itemType, ...arrFields };
           if (primitiveItems.format) result.format = primitiveItems.format;
           if (primitiveItems.enum?.length) {
             result.format = 'enum';
@@ -390,10 +439,25 @@ export class OpenApiImportService {
           }
           return result;
         }
+        return { ...base, ...arrFields };
       }
       // Primitive — safe cast: array branch already returned above
       const primitive = schema as OpenApiPrimitiveSchema;
-      const result: PropertyFormValue = { ...base, type: primitive.type, format: primitive.format ?? '' };
+      const result: PropertyFormValue = {
+        ...base, type: primitive.type, format: primitive.format ?? '',
+        minimum: primitive.minimum !== undefined ? String(primitive.minimum) : '',
+        maximum: primitive.maximum !== undefined ? String(primitive.maximum) : '',
+        exclusiveMinimum: primitive.exclusiveMinimum ?? false,
+        exclusiveMaximum: primitive.exclusiveMaximum ?? false,
+        multipleOf: primitive.multipleOf !== undefined ? String(primitive.multipleOf) : '',
+        minLength: primitive.minLength !== undefined ? String(primitive.minLength) : '',
+        maxLength: primitive.maxLength !== undefined ? String(primitive.maxLength) : '',
+        pattern: primitive.pattern ?? '',
+        nullable: primitive.nullable ?? false,
+        readOnly: primitive.readOnly ?? false,
+        writeOnly: primitive.writeOnly ?? false,
+        deprecated: primitive.deprecated ?? false,
+      };
       if (primitive.enum?.length) {
         result.format = 'enum';
         result.enumValues = (primitive.enum as Array<string | number | boolean>).join(', ');
@@ -549,13 +613,20 @@ export class OpenApiImportService {
 
         const queryParams = params
           .filter(p => p.in === 'query')
-          .map(p => ({
-            name: p.name,
-            type: p.schema?.type ?? 'string',
-            required: !!p.required,
-            description: p.description ?? '',
-            default: p.schema?.default !== undefined ? String(p.schema.default) : '',
-          }));
+          .map(p => {
+            const style = p.style ?? 'form';
+            const defaultExplode = style === 'form';
+            return {
+              name: p.name,
+              type: p.schema?.type ?? 'string',
+              required: !!p.required,
+              description: p.description ?? '',
+              default: p.schema?.default !== undefined ? String(p.schema.default) : '',
+              style,
+              explode: p.explode !== undefined ? p.explode : defaultExplode,
+              allowEmptyValue: p.allowEmptyValue ?? false,
+            };
+          });
 
         const requestBody = Object.entries(operation.requestBody?.content ?? {}).map(
           ([mimeType, entry]) => ({

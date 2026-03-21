@@ -13,6 +13,7 @@ import { LucideAngularModule, Braces, Plus, Trash2, CircleCheck, TriangleAlert, 
   styleUrl: './schemas.component.scss',
 })
 export class SchemasComponent implements OnInit {
+  private readonly expandedProps = new Set<string>();
   readonly kinds = ['object', 'primitive', 'array', '$ref', 'allOf', 'oneOf', 'anyOf', 'not'];
   readonly kindLabels: Record<string, string> = {
     object: 'Objeto',
@@ -179,5 +180,31 @@ export class SchemasComponent implements OnInit {
 
   getBadgeClass(kind: string): string {
     return this.kindBadgeClasses[kind] ?? 'bg-badge-slate-bg text-badge-slate-text';
+  }
+
+  isNumericType(type: string): boolean {
+    return type === 'number' || type === 'integer';
+  }
+
+  isStringType(type: string): boolean {
+    return type === 'string';
+  }
+
+  hasPropConstraints(schI: number, propI: number): boolean {
+    const type = this.getPropType(schI, propI);
+    return type === 'string' || type === 'integer' || type === 'number' || type.endsWith('[]');
+  }
+
+  togglePropConstraints(schI: number, propI: number): void {
+    const key = `${schI}-${propI}`;
+    if (this.expandedProps.has(key)) {
+      this.expandedProps.delete(key);
+    } else {
+      this.expandedProps.add(key);
+    }
+  }
+
+  isPropExpanded(schI: number, propI: number): boolean {
+    return this.expandedProps.has(`${schI}-${propI}`);
   }
 }

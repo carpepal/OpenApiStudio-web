@@ -207,18 +207,21 @@
 
             @if (forms.getQueryParamGroups(pathI).length > 0) {
               <div class="border border-border-light rounded-lg overflow-hidden">
-                <div class="grid grid-cols-[1fr_8rem_3.5rem_1fr_1fr_2rem] gap-2 px-3 py-2 bg-surface-alt text-[11px] text-text-tertiary font-semibold uppercase tracking-wide border-b border-border-light">
+                <div class="grid grid-cols-[1fr_7rem_8rem_3rem_3rem_1fr_7rem_3rem_2rem] gap-2 px-3 py-2 bg-surface-alt text-[11px] text-text-tertiary font-semibold uppercase tracking-wide border-b border-border-light">
                   <span>Name</span>
                   <span>Type</span>
+                  <span>Style</span>
+                  <span class="text-center">Expl.</span>
                   <span class="text-center">Req.</span>
                   <span>Description</span>
                   <span>Default</span>
+                  <span class="text-center">Empty</span>
                   <span></span>
                 </div>
                 @for (param of forms.getQueryParamGroups(pathI); track paramI; let paramI = $index) {
                   <div
                     [formGroupName]="paramI"
-                    class="grid grid-cols-[1fr_8rem_3.5rem_1fr_1fr_2rem] gap-2 items-center px-3 py-2 border-b border-border-row last:border-b-0 hover:bg-surface-alt/50 transition-colors"
+                    class="grid grid-cols-[1fr_7rem_8rem_3rem_3rem_1fr_7rem_3rem_2rem] gap-2 items-center px-3 py-2 border-b border-border-row last:border-b-0 hover:bg-surface-alt/50 transition-colors"
                   >
                     <input
                       formControlName="name"
@@ -234,6 +237,17 @@
                         <option [value]="t">{{ t }}</option>
                       }
                     </select>
+                    <select
+                      formControlName="style"
+                      class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
+                    >
+                      @for (s of queryParamStyles; track s) {
+                        <option [value]="s">{{ s }}</option>
+                      }
+                    </select>
+                    <div class="flex justify-center">
+                      <input type="checkbox" formControlName="explode" class="w-4 h-4 accent-accent" />
+                    </div>
                     <div class="flex justify-center">
                       <input type="checkbox" formControlName="required" class="w-4 h-4 accent-accent" />
                     </div>
@@ -249,6 +263,9 @@
                       placeholder="Default..."
                       class="border border-border-light rounded-md px-2 py-1.5 text-xs w-full bg-surface-alt text-text-primary transition-colors"
                     />
+                    <div class="flex justify-center">
+                      <input type="checkbox" formControlName="allowEmptyValue" class="w-4 h-4 accent-accent" />
+                    </div>
                     <button
                       type="button"
                       (click)="forms.removeQueryParam(pathI, paramI)"

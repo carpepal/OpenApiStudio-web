@@ -174,13 +174,17 @@ export class OpenApiBuilderService {
         const schema: OpenApiPrimitiveSchema = { type: (p.type || 'string') as OpenApiPrimitiveSchema['type'] };
         const parsedDefault = this.parseDefaultValue(p.default, p.type || 'string');
         if (parsedDefault !== undefined) schema.default = parsedDefault;
-        return {
+        const param: OpenApiParameter = {
           in: 'query' as const,
           name: p.name,
           required: !!p.required,
           schema,
           ...(p.description && { description: p.description }),
         };
+        if (p.style && p.style !== 'form') param.style = p.style;
+        if (p.explode === false) param.explode = false;
+        if (p.allowEmptyValue === true) param.allowEmptyValue = true;
+        return param;
       });
 
     return [...pathParams, ...queryParams];
@@ -296,7 +300,7 @@ export class OpenApiBuilderService {
       if (prop.required) required.push(prop.name);
     }
 
-    return {
+    const result: OpenApiObjectSchema = {
       type: 'object',
       ...(schema.title?.trim() && { title: schema.title }),
       ...(schema.description && { description: schema.description }),
@@ -304,6 +308,11 @@ export class OpenApiBuilderService {
       ...(required.length && { required }),
       ...this.buildAdditionalProperties(schema),
     };
+    if (schema.nullable) result.nullable = true;
+    if (schema.readOnly) result.readOnly = true;
+    if (schema.writeOnly) result.writeOnly = true;
+    if (schema.deprecated) result.deprecated = true;
+    return result;
   }
 
   private buildPrimitiveSchema(schema: SchemaFormValue): OpenApiPrimitiveSchema {
@@ -316,6 +325,33 @@ export class OpenApiBuilderService {
       ...(schema.format?.trim() && schema.format !== 'enum' && { format: schema.format }),
       ...(schema.example?.trim() && { example: schema.example }),
     };
+
+    // Numeric constraints
+    if (type === 'number' || type === 'integer') {
+      const minimum = this.parseOptionalNumber(schema.minimum);
+      const maximum = this.parseOptionalNumber(schema.maximum);
+      const multipleOf = this.parseOptionalNumber(schema.multipleOf);
+      if (minimum !== undefined) result.minimum = minimum;
+      if (maximum !== undefined) result.maximum = maximum;
+      if (schema.exclusiveMinimum) result.exclusiveMinimum = true;
+      if (schema.exclusiveMaximum) result.exclusiveMaximum = true;
+      if (multipleOf !== undefined) result.multipleOf = multipleOf;
+    }
+
+    // String constraints
+    if (type === 'string') {
+      const minLength = this.parseOptionalInt(schema.minLength);
+      const maxLength = this.parseOptionalInt(schema.maxLength);
+      if (minLength !== undefined) result.minLength = minLength;
+      if (maxLength !== undefined) result.maxLength = maxLength;
+      if (schema.pattern?.trim()) result.pattern = schema.pattern.trim();
+    }
+
+    // Flags
+    if (schema.nullable) result.nullable = true;
+    if (schema.readOnly) result.readOnly = true;
+    if (schema.writeOnly) result.writeOnly = true;
+    if (schema.deprecated) result.deprecated = true;
 
     // Only add enum if format === 'enum' and enumValues parsed successfully
     if (schema.format === 'enum' && schema.enumValues?.trim()) {
@@ -337,12 +373,24 @@ export class OpenApiBuilderService {
         ? { $ref: `#/components/schemas/${schema.itemsRef}` }
         : { type: (schema.itemsType || 'string') as OpenApiPrimitiveSchema['type'] };
 
-    return {
+    const result: OpenApiArraySchema = {
       type: 'array',
       ...(schema.title?.trim() && { title: schema.title }),
       items,
       ...(schema.description && { description: schema.description }),
     };
+
+    const minItems = this.parseOptionalInt(schema.minItems);
+    const maxItems = this.parseOptionalInt(schema.maxItems);
+    if (minItems !== undefined) result.minItems = minItems;
+    if (maxItems !== undefined) result.maxItems = maxItems;
+    if (schema.uniqueItems) result.uniqueItems = true;
+    if (schema.nullable) result.nullable = true;
+    if (schema.readOnly) result.readOnly = true;
+    if (schema.writeOnly) result.writeOnly = true;
+    if (schema.deprecated) result.deprecated = true;
+
+    return result;
   }
 
   private buildComposedSchema(schema: SchemaFormValue): OpenApiComposedSchema {
@@ -363,10 +411,20 @@ export class OpenApiBuilderService {
       return { $ref: `#/components/schemas/${prop.refSchema}` } satisfies OpenApiRefSchema;
     }
     if (type === '$ref[]') {
-      return {
+      const refArr: OpenApiArraySchema = {
         type: 'array',
         items: { $ref: `#/components/schemas/${prop.refSchema}` },
-      } satisfies OpenApiArraySchema;
+      };
+      const minItems = this.parseOptionalInt(prop.minItems);
+      const maxItems = this.parseOptionalInt(prop.maxItems);
+      if (minItems !== undefined) refArr.minItems = minItems;
+      if (maxItems !== undefined) refArr.maxItems = maxItems;
+      if (prop.uniqueItems) refArr.uniqueItems = true;
+      if (prop.nullable) refArr.nullable = true;
+      if (prop.readOnly) refArr.readOnly = true;
+      if (prop.writeOnly) refArr.writeOnly = true;
+      if (prop.deprecated) refArr.deprecated = true;
+      return refArr;
     }
     if (type === 'not') {
       return { not: { $ref: `#/components/schemas/${prop.refSchema}` } } satisfies OpenApiNotSchema;
@@ -394,16 +452,50 @@ export class OpenApiBuilderService {
         }
       }
 
-      return {
-        type: 'array',
-        items,
-      } satisfies OpenApiArraySchema;
+      const primArr: OpenApiArraySchema = { type: 'array', items };
+      const minItems = this.parseOptionalInt(prop.minItems);
+      const maxItems = this.parseOptionalInt(prop.maxItems);
+      if (minItems !== undefined) primArr.minItems = minItems;
+      if (maxItems !== undefined) primArr.maxItems = maxItems;
+      if (prop.uniqueItems) primArr.uniqueItems = true;
+      if (prop.nullable) primArr.nullable = true;
+      if (prop.readOnly) primArr.readOnly = true;
+      if (prop.writeOnly) primArr.writeOnly = true;
+      if (prop.deprecated) primArr.deprecated = true;
+      return primArr;
     }
 
     const primitiveSchema: OpenApiPrimitiveSchema = {
       type: type as OpenApiPrimitiveSchema['type'],
       ...(prop.format?.trim() && prop.format !== 'enum' && { format: prop.format }),
     };
+
+    // Numeric constraints
+    if (type === 'number' || type === 'integer') {
+      const minimum = this.parseOptionalNumber(prop.minimum);
+      const maximum = this.parseOptionalNumber(prop.maximum);
+      const multipleOf = this.parseOptionalNumber(prop.multipleOf);
+      if (minimum !== undefined) primitiveSchema.minimum = minimum;
+      if (maximum !== undefined) primitiveSchema.maximum = maximum;
+      if (prop.exclusiveMinimum) primitiveSchema.exclusiveMinimum = true;
+      if (prop.exclusiveMaximum) primitiveSchema.exclusiveMaximum = true;
+      if (multipleOf !== undefined) primitiveSchema.multipleOf = multipleOf;
+    }
+
+    // String constraints
+    if (type === 'string') {
+      const minLength = this.parseOptionalInt(prop.minLength);
+      const maxLength = this.parseOptionalInt(prop.maxLength);
+      if (minLength !== undefined) primitiveSchema.minLength = minLength;
+      if (maxLength !== undefined) primitiveSchema.maxLength = maxLength;
+      if (prop.pattern?.trim()) primitiveSchema.pattern = prop.pattern.trim();
+    }
+
+    // Flags
+    if (prop.nullable) primitiveSchema.nullable = true;
+    if (prop.readOnly) primitiveSchema.readOnly = true;
+    if (prop.writeOnly) primitiveSchema.writeOnly = true;
+    if (prop.deprecated) primitiveSchema.deprecated = true;
 
     // Only add enum if format === 'enum' and enumValues parsed successfully
     if (prop.format === 'enum' && prop.enumValues?.trim()) {
@@ -477,6 +569,20 @@ export class OpenApiBuilderService {
     }
 
     return schemes;
+  }
+
+  // ── Number Parsers ────────────────────────────────────────────────────────
+
+  private parseOptionalNumber(value: string): number | undefined {
+    if (!value?.trim()) return undefined;
+    const n = parseFloat(value.trim());
+    return isNaN(n) ? undefined : n;
+  }
+
+  private parseOptionalInt(value: string): number | undefined {
+    if (!value?.trim()) return undefined;
+    const n = parseInt(value.trim(), 10);
+    return isNaN(n) ? undefined : n;
   }
 
   // ── Default Value Parser ──────────────────────────────────────────────────
@@ -596,6 +702,10 @@ export class OpenApiBuilderService {
       required: false, // Not used in additionalProperties context
       enumValues: schema.additionalPropsEnum || '',
       default: '',
+      minimum: '', maximum: '', exclusiveMinimum: false, exclusiveMaximum: false, multipleOf: '',
+      minLength: '', maxLength: '', pattern: '',
+      minItems: '', maxItems: '', uniqueItems: false,
+      nullable: false, readOnly: false, writeOnly: false, deprecated: false,
     };
 
     const builtSchema = this.buildPropertySchema(propertyLike);

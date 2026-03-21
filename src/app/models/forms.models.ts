@@ -53,6 +53,25 @@ export interface PropertyFormValue {
   required: boolean;
   enumValues: string;
   default: string;
+  // Numeric constraints
+  minimum: string;
+  maximum: string;
+  exclusiveMinimum: boolean;
+  exclusiveMaximum: boolean;
+  multipleOf: string;
+  // String constraints
+  minLength: string;
+  maxLength: string;
+  pattern: string;
+  // Array constraints
+  minItems: string;
+  maxItems: string;
+  uniqueItems: boolean;
+  // Flags
+  nullable: boolean;
+  readOnly: boolean;
+  writeOnly: boolean;
+  deprecated: boolean;
 }
 
 
@@ -82,6 +101,25 @@ export interface SchemaFormValue {
   // $ref / not / allOf / oneOf / anyOf
   refSchema: string;
   composedSchemas: string[];
+  // Numeric constraints (primitive)
+  minimum: string;
+  maximum: string;
+  exclusiveMinimum: boolean;
+  exclusiveMaximum: boolean;
+  multipleOf: string;
+  // String constraints (primitive)
+  minLength: string;
+  maxLength: string;
+  pattern: string;
+  // Array constraints
+  minItems: string;
+  maxItems: string;
+  uniqueItems: boolean;
+  // Flags (all kinds)
+  nullable: boolean;
+  readOnly: boolean;
+  writeOnly: boolean;
+  deprecated: boolean;
 }
 
 export interface PathParamFormValue {
@@ -96,6 +134,9 @@ export interface QueryParamFormValue {
   required: boolean;
   description: string;
   default: string;
+  style: string;
+  explode: boolean;
+  allowEmptyValue: boolean;
 }
 
 export interface RequestBodyContentFormValue {
