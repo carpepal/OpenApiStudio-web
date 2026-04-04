@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output, ViewChild, inject } from '@angular/core';
-import { ThemeService } from '../../services/theme.service';
+import { ThemeService } from '../../services/theme/theme.service';
 import { LucideAngularModule, Eye, Sun, Moon, Upload, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
 import { ImportModalComponent } from '../import-modal/import-modal.component';
 

@@ -1,13 +1,16 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, inject, signal } from '@angular/core';
 import { OpenApiBuilderService } from '../../services/open-api-builder.service';
-import { LucideAngularModule, Copy, Download, Check, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
+import { ClipboardService } from '../../services/clipboard/clipboard.service';
+import { FileExportService } from '../../services/file-export/file-export.service';
+import { LucideAngularModule, Copy, Download, Check, Eye, LUCIDE_ICONS, LucideIconProvider } from 'lucide-angular';
+import { VisualPreviewComponent } from './visual/visual-preview.component';
 
-type PreviewTab = 'json' | 'yaml';
+type PreviewTab = 'json' | 'yaml' | 'visual';
 
 @Component({
   selector: 'app-preview',
-  imports: [LucideAngularModule],
-  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Copy, Download, Check }) }],
+  imports: [LucideAngularModule, VisualPreviewComponent],
+  providers: [{ provide: LUCIDE_ICONS, multi: true, useFactory: () => new LucideIconProvider({ Copy, Download, Check, Eye }) }],
   templateUrl: 'preview.component.html',
 })
 export class PreviewComponent {
@@ -15,6 +18,9 @@ export class PreviewComponent {
 
   readonly activeTab = signal<PreviewTab>('json');
   readonly copied = signal(false);
+
+  private readonly clipboard = inject(ClipboardService);
+  private readonly fileExport = inject(FileExportService);
 
   constructor(readonly builder: OpenApiBuilderService) {}
 
@@ -33,9 +39,13 @@ export class PreviewComponent {
     this.activeTab.set(tab);
   }
 
+  isCodeTab(): boolean {
+    return this.activeTab() === 'json' || this.activeTab() === 'yaml';
+  }
+
   async copy(): Promise<void> {
     try {
-      await navigator.clipboard.writeText(this.content);
+      await this.clipboard.writeText(this.content);
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 2000);
     } catch (error) {
@@ -46,12 +56,6 @@ export class PreviewComponent {
   download(): void {
     const extension = this.activeTab() === 'json' ? 'json' : 'yaml';
     const mimeType = this.activeTab() === 'json' ? 'application/json' : 'text/yaml';
-    const blob = new Blob([this.content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = `openapi-spec.${extension}`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    this.fileExport.download(this.content, `openapi-spec.${extension}`, mimeType);
   }
 }

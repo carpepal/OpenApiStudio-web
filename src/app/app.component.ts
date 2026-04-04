@@ -4,10 +4,11 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 import { PreviewComponent } from './components/preview/preview.component';
 import { AsideComponent } from './components/aside.component/aside.component';
 import { SpecPersistenceService } from './services/spec-persistence.service';
+import { FileChangedModalComponent } from './components/file-changed-modal/file-changed-modal.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, PreviewComponent, AsideComponent],
+  imports: [RouterOutlet, NavbarComponent, PreviewComponent, AsideComponent, FileChangedModalComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

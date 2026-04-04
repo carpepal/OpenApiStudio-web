@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { OpenApiImportService } from '../../services/open-api-import.service';
+import { FileImportService } from '../../services/file-import/file-import.service';
 
 @Component({
   selector: 'app-import-modal',
@@ -19,6 +20,7 @@ import { OpenApiImportService } from '../../services/open-api-import.service';
 })
 export class ImportModalComponent {
   private readonly importService = inject(OpenApiImportService);
+  private readonly fileImport = inject(FileImportService);
 
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
 
@@ -64,6 +66,23 @@ export class ImportModalComponent {
     this.isDragOver.set(false);
     const file = event.dataTransfer?.files?.[0];
     if (file) this.processFile(file);
+  }
+
+  async pickFile(): Promise<void> {
+    this.error.set(null);
+    this.isSuccess.set(false);
+    try {
+      const result = await this.fileImport.pickAndReadFile();
+      if (!result) return;
+      this.fileName.set(result.fileName);
+      this.importService.importFromString(result.content, result.fileName);
+      this.isSuccess.set(true);
+      setTimeout(() => this.close(), 800);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error desconocido al procesar el fichero.';
+      this.error.set(message);
+      this.isSuccess.set(false);
+    }
   }
 
   private processFile(file: File): void {

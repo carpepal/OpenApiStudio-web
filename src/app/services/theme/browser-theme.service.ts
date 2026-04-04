@@ -1,13 +1,13 @@
 import { Injectable, signal, effect, computed } from '@angular/core';
+import { ThemeService, ThemeMode } from './theme.service';
 
-export type ThemeMode = 'light' | 'dark';
-
-@Injectable({ providedIn: 'root' })
-export class ThemeService {
+@Injectable()
+export class BrowserThemeService extends ThemeService {
   readonly currentTheme = signal<ThemeMode>(this.getStoredTheme());
   readonly isDark = computed(() => this.currentTheme() === 'dark');
 
   constructor() {
+    super();
     this.applyThemeToDocument(this.currentTheme());
     effect(() => {
       const theme = this.currentTheme();
@@ -17,15 +17,13 @@ export class ThemeService {
   }
 
   toggleTheme(): void {
-    this.currentTheme.update(current => current === 'light' ? 'dark' : 'light');
+    this.currentTheme.update(current => (current === 'light' ? 'dark' : 'light'));
   }
 
   private getStoredTheme(): ThemeMode {
     try {
       const stored = localStorage.getItem('theme');
-      if (stored === 'dark' || stored === 'light') {
-        return stored;
-      }
+      if (stored === 'dark' || stored === 'light') return stored;
     } catch (error) {
       console.warn('Error al leer tema desde localStorage:', error);
     }

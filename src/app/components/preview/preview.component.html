@@ -2,6 +2,7 @@
 
   <!-- Header -->
   <div class="flex items-center gap-3 px-4 py-3 bg-surface-alt border-b border-border-light shrink-0">
+    <lucide-icon name="eye" [size]="16" class="text-accent shrink-0"></lucide-icon>
     <span class="text-sm font-semibold">Preview</span>
     <div class="flex-1"></div>
 
@@ -25,35 +26,53 @@
         class="px-3 py-1 text-xs font-mono rounded transition-colors">
         YAML
       </button>
+      <button
+        (click)="setTab('visual')"
+        [class.bg-accent]="activeTab() === 'visual'"
+        [class.text-text-on-dark]="activeTab() === 'visual'"
+        [class.text-text-muted]="activeTab() !== 'visual'"
+        [attr.aria-pressed]="activeTab() === 'visual'"
+        class="px-3 py-1 text-xs rounded transition-colors">
+        Visual
+      </button>
     </div>
 
-    <!-- Copy button -->
-    <button
-      (click)="copy()"
-      class="flex items-center gap-1.5 text-xs text-text-secondary hover:text-text-primary transition-colors px-2.5 py-1.5 rounded-md bg-surface-muted border border-border-light hover:bg-surface">
-      <lucide-icon [name]="copied() ? 'check' : 'copy'" [size]="14"></lucide-icon>
-      {{ copied() ? 'Copied' : 'Copy' }}
-    </button>
+    @if (isCodeTab()) {
+      <!-- Copy button -->
+      <button
+        (click)="copy()"
+        class="flex items-center gap-1.5 text-xs text-text-secondary hover:text-text-primary transition-colors px-2.5 py-1.5 rounded-md bg-surface-muted border border-border-light hover:bg-surface">
+        <lucide-icon [name]="copied() ? 'check' : 'copy'" [size]="14"></lucide-icon>
+        {{ copied() ? 'Copied' : 'Copy' }}
+      </button>
 
-    <!-- Download button -->
-    <button
-      (click)="download()"
-      class="flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors p-1.5 rounded-md bg-surface-muted border border-border-light hover:bg-surface"
-      aria-label="Download file">
-      <lucide-icon name="download" [size]="14"></lucide-icon>
-    </button>
+      <!-- Download button -->
+      <button
+        (click)="download()"
+        class="flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors p-1.5 rounded-md bg-surface-muted border border-border-light hover:bg-surface"
+        aria-label="Download file">
+        <lucide-icon name="download" [size]="14"></lucide-icon>
+      </button>
+    }
   </div>
 
-  <!-- Content with line numbers -->
-  <div class="flex-1 overflow-auto flex">
-    <!-- Line numbers gutter -->
-    <div class="w-11 shrink-0 bg-surface-alt text-text-muted text-right pr-3 pt-4 pb-4 text-xs font-mono leading-[1.7] select-none border-r border-border-light">
-      @for (lineNum of lineNumbers; track lineNum) {
-        <div>{{ lineNum }}</div>
-      }
+  <!-- Visual preview -->
+  @if (activeTab() === 'visual') {
+    <div class="flex-1 overflow-hidden">
+      <app-visual-preview [spec]="builder.spec()" />
     </div>
-    <!-- Code -->
-    <pre class="flex-1 p-4 text-xs font-mono leading-[1.7] text-code whitespace-pre overflow-x-auto">{{ content }}</pre>
-  </div>
+  } @else {
+    <!-- Content with line numbers -->
+    <div class="flex-1 overflow-auto flex">
+      <!-- Line numbers gutter -->
+      <div class="w-11 shrink-0 bg-surface-alt text-text-muted text-right pr-3 pt-4 pb-4 text-xs font-mono leading-[1.7] select-none border-r border-border-light">
+        @for (lineNum of lineNumbers; track lineNum) {
+          <div>{{ lineNum }}</div>
+        }
+      </div>
+      <!-- Code -->
+      <pre class="flex-1 p-4 text-xs font-mono leading-[1.7] text-code whitespace-pre overflow-x-auto">{{ content }}</pre>
+    </div>
+  }
 
 </div>

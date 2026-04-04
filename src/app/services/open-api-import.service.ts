@@ -33,7 +33,12 @@ export class OpenApiImportService {
 
   // ── Parsing & validation ────────────────────────────────────────────────────
 
+  private static readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
   private parseSpec(content: string, filename: string): OpenApiSpec {
+    if (content.length > OpenApiImportService.MAX_FILE_SIZE) {
+      throw new Error('El fichero supera el tamaño máximo permitido (10 MB).');
+    }
     const lower = filename.toLowerCase();
     try {
       if (lower.endsWith('.yaml') || lower.endsWith('.yml')) {

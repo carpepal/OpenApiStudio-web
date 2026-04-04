@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { AfterViewInit, Component, DestroyRef, Injector, afterNextRender, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime } from 'rxjs';
 import { MainComponent } from '../../layout/main/main.component';
 import { OpenApiFormsService } from '../../services/open-api-forms.service';
 import { OpenApiStateService } from '../../services/open-api-state.service';
@@ -13,7 +15,7 @@ import { PageHeaderComponent } from '../../components/page-header/page-header.co
   templateUrl: './paths.component.html',
   styleUrl: './paths.component.scss',
 })
-export class PathsComponent {
+export class PathsComponent implements AfterViewInit {
   readonly methods = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'];
   readonly paramTypes = ['string', 'integer', 'number', 'boolean'];
   readonly queryParamStyles = ['form', 'spaceDelimited', 'pipeDelimited', 'deepObject'];
@@ -28,7 +30,29 @@ export class PathsComponent {
     options: 'bg-badge-slate-bg text-badge-slate-text',
   };
 
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
+
   constructor(public forms: OpenApiFormsService, public state: OpenApiStateService) {}
+
+  ngAfterViewInit(): void {
+    // Schedule the initial re-apply via afterNextRender so that signal-driven
+    // @for blocks (tagNames, schemeNames) have already rendered their <option>
+    // elements and registered them in SelectMultipleControlValueAccessor._optionMap
+    // before writeValue is called. In Angular 19, signal-based rendering runs in
+    // a separate cycle from ngAfterViewInit, so a direct call here is too early.
+    afterNextRender(() => this.reapplyMultiSelects(), { injector: this.injector });
+
+    // Re-apply after any structural change to pathsForm (e.g. a new import
+    // while the user is already on this page). debounceTime(0) batches rapid
+    // emissions; afterNextRender ensures Angular has already re-rendered the
+    // @for <option> elements before we call writeValue.
+    this.forms.pathsForm.valueChanges
+      .pipe(debounceTime(0), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        afterNextRender(() => this.reapplyMultiSelects(), { injector: this.injector });
+      });
+  }
 
   syncPathParams(pathIndex: number, pathValue: string) {
     const names = [...pathValue.matchAll(/\{([^}]+)\}/g)].map(m => m[1]);
@@ -50,5 +74,21 @@ export class PathsComponent {
 
   getMethodBadgeClass(method: string): string {
     return this.methodBadgeClasses[method] ?? 'bg-badge-slate-bg text-badge-slate-text';
+  }
+
+  /**
+   * Re-patches tags and security on every path group using { emitEvent: false }
+   * to avoid triggering valueChanges again. This forces Angular's
+   * SelectMultipleControlValueAccessor to call writeValue a second time,
+   * now that the @for-rendered <option> elements are registered.
+   */
+  private reapplyMultiSelects(): void {
+    this.forms.pathsForm.controls.forEach((ctrl) => {
+      const g = ctrl as FormGroup;
+      g.patchValue(
+        { tags: g.get('tags')?.value ?? [], security: g.get('security')?.value ?? [] },
+        { emitEvent: false },
+      );
+    });
   }
 }
